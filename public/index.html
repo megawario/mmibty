@@ -1,0 +1,96 @@
+<!DOCTYPE html lang="pt">
+<html ng-app='mmibty'>
+  <head>
+    <title>My Music Is Better Than Yours</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="=viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <script src="js/jquery-2.2.0.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-cookies.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-animate.js"></script>
+    <!-- BootStrap -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <!-- Angular scripts -->
+    <script src="js/mmibty.js"></script>
+    <script src="js/services.js"></script>
+    <script src="js/controllers.js"></script>
+
+  </head>
+  <body ng-controller="mmibtyController as mm">
+    <div class="container">
+      <div class="jumbotron">
+	<div class="page-header">
+	  <h1>My music is better than yours <small>FUNdão edition</small></h1>
+	</div>
+	<div  ng-show="mm.isStart">
+	  <div class="input-group input-group-lg">
+	    <span class="input-group-addon" id="sizing-addon1">@</span>
+	    <input type="text" class="form-control"
+		   placeholder="I am the artist formely known as ..."
+		   aria-describedby="sizing-addon1"
+		   ng-model="mm.name">
+	    <span class="input-group-btn">
+	      <button class="btn btn-default" type="button" ng-click="mm.go()">Go!</button>
+	    </span>
+	  </div>
+	</div>
+	<div>
+	  <ul class="nav nav-pills">
+	    <li role="presentation"><a href="#" ng-click="mm.selectedTab=0">Pick</a></li>
+	    <li role="presentation"><a href="#" ng-click="mm.selectedTab=1">Your music</a></li>
+	    <li role="presentation"><a href="#" ng-click="mm.selectedTab=2">Our music</a></li>
+	    <li role="presentation"><a href="#" ng-click="mm.selectedTab=3">Is better</a></li>
+	  </ul>
+	</div>
+      </div>
+      
+      <div class="container">
+	
+	<div ng-show="mm.selected(0)">
+	  
+	  <!-- search bar -->
+	  <div class="input-group input-group-lg search-bar">
+	    <input type="text"
+		   class="form-control"
+		   placeholder="Search for artist or music"
+		   aria-describedby="sizing-addon1"
+		   ng-model="mm.searchInput">
+	    <span class="input-group-btn">
+	      <button class="btn btn-default" type="button" ng-click="mm.searchTrack()"><i class="material-icons">search</i></button>
+	    </span>
+	  </div>
+
+	  <!-- display search bar results -->
+	  <div class = "row">
+	    <div class="col-sm-6 col-md-4" ng-repeat="t in mm.searchResult.tracks.items | orderBy:'-popularity'">
+	      <div class="thumbnail" >
+		<img ng-src="{{t.album.images[1].url}}" alt="album image">
+		<div class="caption">
+		  <h3>{{t.name}}</h3>
+		  <h4>by: <a href={{t.artists[0].external_url.spotify}} >{{t.artists[0].name}}</a></h4>
+		  <p>
+		    <i class="material-icons">favorite</i> {{t.popularity}}
+		    <i class="material-icons">av_timer</i> {{t.duration_ms | date:'mm:ss'}}
+		  </p>
+		  <p>
+		    <a href="#" class="btn btn-primary" role="button"><i class="material-icons">add</i></a>
+		    <a href="{{t.preview_url}}" class="btn btn-primary" role="button"><i class="material-icons">play_arrow</i></a>
+		  </p>
+		</div>
+	      </div>
+	    </div> 
+	    
+	  </div>
+	</div>
+	<div ng-show="mm.selected(1)"><h1>music that you selected to play on the playlist</h1></div>
+	<div ng-show="mm.selected(2)">music that is in the playlist</div>
+	<div ng-show="mm.selected(3)">information regargint the music playlist</div>
+      </div>
+    </div>
+  </body>
+	   
+  
+</html>

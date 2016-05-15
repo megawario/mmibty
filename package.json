@@ -1,0 +1,11 @@
+{
+  "name": "mmibty",
+  "version": "0.0.0",
+  "description": "Distributed playlist selection using spotify",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mário Pinto",
+  "license": "ISC"
+}

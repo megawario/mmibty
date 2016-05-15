@@ -1,0 +1,43 @@
+@import url("bootstrap.min.css");
+
+/*
+body{
+    background-color: #bbcc99;
+}
+*/
+
+.jumbotron{
+    background-image: url(../images/jumbotron.jpg);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position:center;
+    padding-bottom: 0 !important;
+    margin:5%;
+    margin-bottom:1%;
+}
+
+.nav{
+    
+}
+
+.nav-tabs > li, .nav-pills > li {
+    float:none;
+    display:inline-block;
+}
+
+.nav-tabs, .nav-pills {
+    text-align:center;
+}
+
+.page-header{
+    color:white;
+    text-shadow:0 0 1px transparent;
+    text-shadow:0 0 0 #f00, 0 0 1px transparent;
+}
+
+
+.search-bar{
+    margin-bottom: 20px;
+    margin-left: 20%;
+    margin-right: 20%;
+}
