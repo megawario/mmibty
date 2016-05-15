@@ -23,6 +23,14 @@ module.exports = function(express,config,log){
 */
     
     //GET
+    //get name associated with the machine
+    router.get('/name/',function(req,res){
+	var remote =req.connection.remoteAddress;
+	if(remote!=="undefined") res.json({name:config.auth[remote]});
+	else res.sendStatus(500); //server Error
+    });
+
+
     //wrap access arround spotify api
 /*    router.get('/playlist/',function(req,res){
          https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}/tracks

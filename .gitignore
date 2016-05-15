@@ -1,6 +1,7 @@
 
 # Created by https://www.gitignore.io/api/emacs,node
 
+config.js
 ### Emacs ###
 # -*- mode: gitignore; -*-
 *~

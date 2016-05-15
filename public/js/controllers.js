@@ -31,4 +31,11 @@ angular.module('mmibty.controllers',
 		    }).bind(this),function(response){alert("error occured while searching")});
 	}
 
+
+	//get name of machine:
+	mmibtyAPI.getName().then((function(response){
+	    this.name=response.data.name;
+	}).bind(this));
+	
+
     });

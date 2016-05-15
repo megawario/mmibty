@@ -3,6 +3,7 @@
 var config = require('./config.js');
 var log = require("./utils").log;
 
+
 //set debug mode according to config
 if(config.server.debug){
     process.env.NODE_ENV="development";
