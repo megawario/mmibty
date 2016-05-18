@@ -8,6 +8,10 @@ angular.module('mmibty.controllers',
 	this.name="" //name for the page
 	this.searchInput="";
 	this.searchResult="";
+	this.isAdmin=false; //set administrator
+
+	//model for the playlist tracks
+	this.playlistTracks={};
 	
 	//removes go function
 	this.go = function(){
@@ -32,9 +36,20 @@ angular.module('mmibty.controllers',
 	}
 
 
+	mmibtyAPI.getPlaylistTracks().then(
+	    (function(response){
+		this.playlistTracks = response.data;
+	    }).bind(this),function(response){alert("error occured while loading")}
+	);
+
 	//get name of machine:
 	mmibtyAPI.getName().then((function(response){
 	    this.name=response.data.name;
+	}).bind(this));
+
+	//sets admin mode for view:
+	mmibtyAPI.isAdmin().then((function(response){
+	    this.isAdmin=true;
 	}).bind(this));
 	
 

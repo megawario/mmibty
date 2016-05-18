@@ -19,6 +19,22 @@ angular.module('mmibty.services',[])
 		url: my_url
 	    });
 	};
+
+	result.isAdmin = function(){
+	    var my_url = "rest/admin/";
+	    return $http({
+		method: 'GET',
+		url: my_url
+	    });
+	};
+
+	result.getPlaylistTracks = function(){
+	    var my_url = "rest/playlist/";
+	    return $http({
+		method: 'GET',
+		url: my_url
+	    });
+	};
 	
 	return result;
     });

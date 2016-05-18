@@ -1,8 +1,8 @@
 //Main server app
 
 var config = require('./config.js');
-var log = require("./utils").log;
-
+var utils = require("./utils");
+var log = utils.log;
 
 //set debug mode according to config
 if(config.server.debug){
@@ -17,9 +17,11 @@ process.on('uncaughtException',function(err){
 });
 
 
+
+var database = require('./database.js')(config.server.dbURL);
 var express = require('express');
 var app = express();
-var routes = require("./routes/playlistAPI.js")(express,config,log);
+var routes = require("./routes/playlistAPI.js")(express,config,utils,database);
 
 
 app.use(config.server.path+"/rest",routes);

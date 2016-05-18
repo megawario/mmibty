@@ -20,6 +20,16 @@ var logger =  function (string,level){
 
 var utils={};
 
+utils.randomString = function(length) {
+    var text = '';
+    var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    
+    for (var i = 0; i < length; i++) {
+	text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+};
+
 //support methods
 utils.log={};
 utils.log.log = function(string,level){logger(string,level);};
