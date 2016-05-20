@@ -10,6 +10,7 @@ module.exports = function Database(connectionString){
     //mock models for accesstoken and refresh token
     this.accessToken = mongoose.model('accessToken',new  mongoose.Schema({access_token:String},{ strict: false }));
     this.refreshToken = mongoose.model('refreshToken',new mongoose.Schema({refresh_token:String}, { strict: false }));
+    //this.track = mongoose.model("track")
     
     //connection events:
     this.mongoose.connection.on('connected',function(){
@@ -22,20 +23,29 @@ module.exports = function Database(connectionString){
 	log.warning('Mongoose disconnected');
     });
 
+
+    //set track - this adds track to the database. it track exists it will do nothing.
+    this.addTrack = function(json,callback){
+	//json will contain track_id, machine_ip and user name
+	this.track.create(json,function(err){});
+    }
+
+    
     //store refresh and auth tokens:
-    this.storeAccessToken = function(json,callback){
+    this.storeAccessToken = function(json){
 	log.debug("storing access token");
+	//remove all access tokens:
+	this.accessToken.remove({}).exec(); //not waiting for server response
 	this.accessToken.create(json,function(err){
-	    if(error) log.err(err);
-	    callback(err);
+	    if(err) log.err(err);
 	});
     };
     
-    this.storeRefreshToken = function(json,callback){
+    this.storeRefreshToken = function(json){
 	log.debug("storing refresh token");
+	this.refreshToken.remove({}).exec(); //not waitin for server response
 	this.refreshToken.create(json,function(err){
-	    if(error) log.err(err);
-	    callback(err);
+	    if(err) log.err(err);
 	});
     };
 

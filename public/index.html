@@ -80,7 +80,7 @@
 		    <i class="material-icons">av_timer</i> {{t.duration_ms | date:'mm:ss'}}
 		  </p>
 		  <p>
-		    <a href="#" class="btn btn-primary" role="button"><i class="material-icons">add</i></a>
+		    <a href="#" class="btn btn-primary" role="button" ng-click="mm.addTrack(t.uri)"><i class="material-icons">add</i></a>
 		    <a href="{{t.preview_url}}" class="btn btn-primary" role="button"><i class="material-icons">play_arrow</i></a>
 		  </p>
 		</div>
@@ -95,25 +95,30 @@
 	</div>
 
 	<div ng-show="mm.selected(2)">
-	  <h3>Best music in fundao</h3>
-	  <div ng-repeat="pt in mm.playlistTracks.items">
-	    <div class="col-sm-6 col-md-4">
-	      <div class="thumbnail-list" >
-		<img ng-src="{{pt.track.album.images[2].url}}" alt="album image">
-		<div class="caption">
-		  <h3>{{pt.track.name}}</h3>
-		  <h4>by: <a href={{pt.track.artists[0].external_url.spotify}} >{{pt.track.artists[0].name}}</a></h4>
-		  <p>
-		    <i class="material-icons">favorite</i> {{pt.track.popularity}}
-		    <i class="material-icons">av_timer</i> {{pt.track.duration_ms | date:'mm:ss'}}
-		  </p>
-		  <p>
-		    <a href="{{pt.preview_url}}" class="btn btn-primary" role="button"><i class="material-icons">play_arrow</i></a>
-		  </p>
+	  <h3>The best music is in FUNdão</h3>
+	  <div class="col-sm-6 col-md-4">
+	    <div ng-repeat="pt in mm.playlistTracks.items" >
+	    <ul class="media-list" >
+	      <li class="media">
+		<div class="media-left">
+		  <a href="#">
+		    <img ng-src="{{pt.track.album.images[2].url}}" alt="album image">
+		  </a>
 		</div>
-	      </div>
+		<div class="media-body">
+		  <h4 class="media-heading">{{pt.track.name}}</h4>
+		  <span>
+		    <h4>by: <a href={{pt.track.artists[0].external_url.spotify}} >{{pt.track.artists[0].name}}</a></h4>
+		    <p>
+		      <i class="material-icons">av_timer</i> {{pt.track.duration_ms | date:'mm:ss'}}
+		    </p>
+		  </span>
+		</div>
+	      </li>
+	    </ul>
 	    </div>
 	  </div>
+	  
 	</div>
 	<div ng-show="mm.selected(3)">
 	  <h1>information regarding the music playlist</h1>
@@ -122,6 +127,4 @@
       </div>
     </div>
   </body>
-	   
-  
 </html>

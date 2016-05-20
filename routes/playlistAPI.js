@@ -10,6 +10,17 @@ module.exports = function(express,config,utils,database){
 	next();
     });
 
+    //allways authorize remote address //TODO improve on performance by preprocessing requests here for information.
+    router.use(function(req,res,next){
+	var remote = req.connection.remoteAddress;
+	log.debug("Checking auth for "+remote +"with config.auth: "+config.auth[remote]);
+	if(config.auth[remote] === "undefined"){
+	    res.sendStatus(403); //TODO redirect to forbidden page
+	}else{
+	    next();
+	}
+    });
+
     router.use(bodyParser.json());
 
     //GET
@@ -30,7 +41,8 @@ module.exports = function(express,config,utils,database){
 
    
     // =============================================================================== PLAYLIST ============================================================= //
-    //returns group playlist
+
+    //gets track on group playlist
     router.get('/playlist/',function(req,res){
 	db.getAccessToken(function(err,access_token){
 	    if(err){
@@ -48,6 +60,42 @@ module.exports = function(express,config,utils,database){
 	    }
 	});
 	
+    });
+
+    //add traks
+    router.post('/playlist/track/add',function(req,res){
+	log.debug("track to add: "+req.body.track_uri+" by user: "+req.connection.remoteAddress);
+	var track_uri = req.body.track_uri;
+	//add track to database under user and submit it to spotify
+	/*
+	db.addTrack(json,function(err){
+	    if(err) res.sendStatus(500); //TODO change status message
+	    else res.sendStatus(200);
+	});
+	*/
+	
+	db.getAccessToken(function(err,access_token){
+	    if(err){
+		req.sendStatus(500);
+	    }else{
+		var authHeader= {
+		    url: "https://api.spotify.com/v1/users/"+config.spot.userid+"/playlists/"+config.spot.playlist+"/tracks?uris="+track_uri,
+		    headers: { 'Authorization': 'Bearer ' + access_token },
+		    json: true
+		};
+
+		//var request = new require("request");
+		//request a put on the playlist
+		request.post(authHeader,function(error, response, body){
+		    console.log(error);
+		    console.log(body);
+		    if(error) res.sendStatus(500);
+		    else{
+			res.sendStatus(200);
+		    }
+		} )
+	    }
+	});
     });
     
     // =============================================================================== AUTH ================================================================= //
@@ -115,7 +163,8 @@ module.exports = function(express,config,utils,database){
 		    };
 		    console.log("My access token is: "+access_token);
 		    console.log("My refresh token is: "+refresh_token);
-		    //TODO STORE access token and refresh token in database;
+
+		    //store tokens in database
 		    db.storeAccessToken({"access_token":access_token});
 		    db.storeRefreshToken({"refresh_token":refresh_token});
 		    res.sendStatus(200);

@@ -25,6 +25,19 @@ angular.module('mmibty.controllers',
 	    return this.selectedTab===index;
 	}
 
+	//add track
+	this.addTrack = function(track){
+	    var payload = {track_uri:track}
+	    mmibtyAPI.addTrack(payload).then(
+		(function(response){
+		    if(response.status==200){
+			this.getPlaylistTracks(); //refresh playlist
+			//TODO do something with the response if needed.
+		    }
+		    else{alert("problem occured when adding music");}
+		}).bind(this)
+	    )};
+
 	//searches for song music use this.search to find it
 	this.searchTrack = function(){
 	    var search = this.searchInput.replace(" ","+");
@@ -36,12 +49,17 @@ angular.module('mmibty.controllers',
 	}
 
 
-	mmibtyAPI.getPlaylistTracks().then(
-	    (function(response){
-		this.playlistTracks = response.data;
-	    }).bind(this),function(response){alert("error occured while loading")}
-	);
+	this.getPlaylistTracks = function(){
+	    mmibtyAPI.getPlaylistTracks().then(
+		(function(response){
+		    this.playlistTracks = response.data;
+		}).bind(this),function(response){alert("error occured while loading")}
+	    );
+	};
+	
+	this.getPlaylistTracks();
 
+	
 	//get name of machine:
 	mmibtyAPI.getName().then((function(response){
 	    this.name=response.data.name;

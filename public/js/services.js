@@ -28,11 +28,22 @@ angular.module('mmibty.services',[])
 	    });
 	};
 
+	//get playlist tracks
 	result.getPlaylistTracks = function(){
 	    var my_url = "rest/playlist/";
 	    return $http({
 		method: 'GET',
 		url: my_url
+	    });
+	};
+
+	//add tracks to playlist
+	result.addTrack = function(payload){
+	    var my_url = "rest/playlist/track/add";
+	    return $http({
+		method: 'POST',
+		url: my_url,
+		data: payload
 	    });
 	};
 	
