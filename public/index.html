@@ -11,12 +11,15 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-cookies.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-animate.js"></script>
+
     <!-- BootStrap -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
     <!-- Angular scripts -->
     <script src="js/mmibty.js"></script>
     <script src="js/services.js"></script>
     <script src="js/controllers.js"></script>
+    <script src="js/filters.js"></script>
 
   </head>
   <body ng-controller="mmibtyController as mm">
@@ -28,40 +31,39 @@
 	<div ng-show="mm.isAdmin" class="admin-panel">
 	<a href="rest/login">Log in</a>
 	</div>
-	<div  ng-show="mm.isStart">
-	  <h3>Bem haja {{mm.name}}</h3>
+	<div>
 	  <div class="input-group input-group-lg">
 	    <span class="input-group-addon" id="sizing-addon1">@</span>
 	    <input type="text" class="form-control"
-		   placeholder="I am the artist formely known as ..."
+		   placeholder="Today i am feeling ... "
 		   aria-describedby="sizing-addon1"
-		   ng-model="mm.name">
+		   ng-model="mm.feels">
 	    <span class="input-group-btn">
-	      <button class="btn btn-default" type="button" ng-click="mm.go()">Go!</button>
+	      <button class="btn btn-default" type="button" ng-click="mm.go()">Post</button>
 	    </span>
 	  </div>
-	</div>
-	<div>
-	  <ul class="nav nav-pills">
-	    <li role="presentation"><a href="#" ng-click="mm.selectedTab=0">Pick</a></li>
-	    <li role="presentation"><a href="#" ng-click="mm.selectedTab=1">Your music</a></li>
-	    <li role="presentation"><a href="#" ng-click="mm.selectedTab=2">Our music</a></li>
-	    <li role="presentation"><a href="#" ng-click="mm.selectedTab=3">Is better</a></li>
-	  </ul>
 	</div>
       </div>
       
       <div class="container">
+	<div>
+	  <ul class="nav nav-pills">
+	    <li role="presentation" ng-class="{active: mm.selected(0)}"><a href="#" ng-click="mm.selectedTab=0">Pick</a></li>
+	    <li role="presentation" ng-class="{active: mm.selected(1)}"><a href="#" ng-click="mm.selectedTab=1">Your music</a></li>
+	    <li role="presentation" ng-class="{active: mm.selected(2)}"><a href="#" ng-click="mm.selectedTab=2">Our music</a></li>
+	    <li role="presentation" ng-class="{active: mm.selected(3)}"><a href="#" ng-click="mm.selectedTab=3">Is better</a></li>
+	  </ul>
+	</div>
 	
 	<div ng-show="mm.selected(0)">
-	  
 	  <!-- search bar -->
 	  <div class="input-group input-group-lg search-bar">
 	    <input type="text"
 		   class="form-control"
 		   placeholder="Search for artist or music"
 		   aria-describedby="sizing-addon1"
-		   ng-model="mm.searchInput">
+		   ng-model="mm.searchInput"
+		   ng-keypress="mm.keypressSearch($event)">
 	    <span class="input-group-btn">
 	      <button class="btn btn-default" type="button" ng-click="mm.searchTrack()"><i class="material-icons">search</i></button>
 	    </span>
@@ -69,60 +71,63 @@
 
 	  <!-- display search bar results -->
 	  <div class = "row">
-	    <div class="col-sm-6 col-md-4" ng-repeat="t in mm.searchResult.tracks.items | orderBy:'-popularity'">
-	      <div class="thumbnail" >
-		<img ng-src="{{t.album.images[1].url}}" alt="album image">
-		<div class="caption">
-		  <h3>{{t.name}}</h3>
-		  <h4>by: <a href={{t.artists[0].external_url.spotify}} >{{t.artists[0].name}}</a></h4>
-		  <p>
-		    <i class="material-icons">favorite</i> {{t.popularity}}
-		    <i class="material-icons">av_timer</i> {{t.duration_ms | date:'mm:ss'}}
-		  </p>
-		  <p>
-		    <a href="#" class="btn btn-primary" role="button" ng-click="mm.addTrack(t.uri)"><i class="material-icons">add</i></a>
-		    <a href="{{t.preview_url}}" class="btn btn-primary" role="button"><i class="material-icons">play_arrow</i></a>
-		  </p>
+	    <div ng-repeat="pages in mm.searchResultArray">
+	      <div class="col-sm-6 col-md-3" ng-repeat="t in pages.tracks.items | orderBy:'-popularity'">
+
+		<div class="thumbnail" >
+		  <img class="thumb-img" ng-src="{{t.album.images[1].url}}" alt="album image">
+		  <div class="caption">
+		    <h4 data-toggle="tooltip" title="{{t.name}}" >{{t.name | cutwords:true:25:'...'}}</h4>
+		    <h5>by: <a href={{t.artists[0].external_url.spotify}} >{{t.artists[0].name}}</a></h5>
+		    <p>
+		      <i class="material-icons">favorite</i> {{t.popularity}}
+		      <i class="material-icons">av_timer</i> {{t.duration_ms | date:'mm:ss'}}
+		    </p>
+		    <p>
+		      <a href="#" class="btn btn-primary" role="button" ng-click="mm.addTrack(t.uri)"><i class="material-icons">add</i></a>
+		      <a href="{{t.preview_url}}" class="btn btn-primary" role="button"><i class="material-icons">play_arrow</i></a>
+		    </p>
+		  </div>
 		</div>
 	      </div>
-	    </div>   
+	    </div>
+	    <!-- Check if there are more results on search  -->
+	    <div class="btn-block" ng-show="mm.searchResultArray[mm.searchResultArray.length-1].tracks.next!=null"><a class="btn btn-default see-more" ng-click="mm.getMoreTracks(mm.searchResultArray[mm.searchResultArray.length-1].tracks.next)">See more results</a></div>
 	  </div>
 	  
 	</div>
+	<!--  MUSIC PER USER -->
 	<div ng-show="mm.selected(1)">
-	  <h1>music that you selected to play on the playlist</h1>
-	  <img ng-src="images/inprogress.png" />
+	  <h1>Hi {{mm.name}} there are your tracks:</h1>
+	  <div>
+	    <img ng-src="images/inprogress.png" />
+	  </div>
 	</div>
 
+	<!-- Tracks available on the playlist -->
 	<div ng-show="mm.selected(2)">
-	  <h3>The best music is in FUNdão</h3>
-	  <div class="col-sm-6 col-md-4">
-	    <div ng-repeat="pt in mm.playlistTracks.items" >
-	    <ul class="media-list" >
-	      <li class="media">
-		<div class="media-left">
-		  <a href="#">
-		    <img ng-src="{{pt.track.album.images[2].url}}" alt="album image">
-		  </a>
+	  <div ng-repeat="track in mm.playlistTracksArray">
+	    <div class="col-sm-6 col-md-4" ng-repeat="pt in track.items" >
+	      <div class="thumbnail">
+		<img class="thumb-small" ng-src="{{pt.track.album.images[2].url}}" alt="album image" />
+		<div class="caption caption-small">
+		  <h4 data-toggle="tooltip" title="{{t.name}}" >{{pt.track.name | cutwords:true:25:'...'}}</h4>
+		  <h5>by: <a href={{pt.track.artists[0].external_url.spotify}} >{{pt.track.artists[0].name}}</a></h5>
 		</div>
-		<div class="media-body">
-		  <h4 class="media-heading">{{pt.track.name}}</h4>
-		  <span>
-		    <h4>by: <a href={{pt.track.artists[0].external_url.spotify}} >{{pt.track.artists[0].name}}</a></h4>
-		    <p>
-		      <i class="material-icons">av_timer</i> {{pt.track.duration_ms | date:'mm:ss'}}
-		    </p>
-		  </span>
-		</div>
-	      </li>
-	    </ul>
+	      </div>
 	    </div>
+	    <div class="btn-block" ng-show="mm.playlistTracksArray[mm.playlistTracksArray.length-1].tracks.next!=null">
+	      <a class="btn btn-default see-more" ng-click="mm.getMorePlaylistTracks(mm.playlistTracksArray[mm.playlistTracksArray.length-1].tracks.next)">more tracks</a>
+	    </div>   
 	  </div>
-	  
 	</div>
+	
+	<!-- Statistics of the playlist-->
 	<div ng-show="mm.selected(3)">
-	  <h1>information regarding the music playlist</h1>
-	  <img ng-src="images/inprogress.png" />
+	  <div>
+	    <h1 data-toggle="tooltip" title="Hooray!" >information regarding the music playlist</h1>
+	    <img ng-src="images/inprogress.png" />       
+	  </div>
 	</div>
       </div>
     </div>

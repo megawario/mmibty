@@ -66,36 +66,37 @@ module.exports = function(express,config,utils,database){
     router.post('/playlist/track/add',function(req,res){
 	log.debug("track to add: "+req.body.track_uri+" by user: "+req.connection.remoteAddress);
 	var track_uri = req.body.track_uri;
-	//add track to database under user and submit it to spotify
-	/*
-	db.addTrack(json,function(err){
-	    if(err) res.sendStatus(500); //TODO change status message
-	    else res.sendStatus(200);
-	});
-	*/
-	
-	db.getAccessToken(function(err,access_token){
-	    if(err){
-		req.sendStatus(500);
-	    }else{
-		var authHeader= {
-		    url: "https://api.spotify.com/v1/users/"+config.spot.userid+"/playlists/"+config.spot.playlist+"/tracks?uris="+track_uri,
-		    headers: { 'Authorization': 'Bearer ' + access_token },
-		    json: true
-		};
-
-		//var request = new require("request");
-		//request a put on the playlist
-		request.post(authHeader,function(error, response, body){
-		    console.log(error);
-		    console.log(body);
-		    if(error) res.sendStatus(500);
-		    else{
-			res.sendStatus(200);
-		    }
-		} )
-	    }
-	});
+	var user = req.connection.remoteAddress;
+	var user_name = config.auth[user];
+	db.addTrack({'track_uri':track_uri,'user':user,'user_name':user_name},
+		    function(err){
+			if(err){ //TODO diferentiate error types
+			    res.sendStatus(500);
+			}
+			else{
+			    //add track to the playlist
+			    db.getAccessToken(function(err,access_token){
+				if(err){ //TODO diferentiate error
+				    req.sendStatus(500);
+				}else{
+				    var authHeader= {
+					url: "https://api.spotify.com/v1/users/"+config.spot.userid+"/playlists/"+config.spot.playlist+"/tracks?uris="+track_uri,
+					headers: { 'Authorization': 'Bearer ' + access_token },
+					json: true
+				    };
+				    
+				    request.post(authHeader,function(error, response, body){
+					console.log(error);
+					console.log(body);
+					if(error) res.sendStatus(500);
+					else{
+					    res.sendStatus(200);
+					}
+				    } )
+				}
+			    });
+			}
+		    });	
     });
     
     // =============================================================================== AUTH ================================================================= //

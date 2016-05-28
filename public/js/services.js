@@ -12,6 +12,14 @@ angular.module('mmibty.services',[])
 	    });
 	};
 
+	result.getURL = function(url){
+	    var my_url = url;
+	    return $http({
+		method: 'GET',
+		url: my_url
+	    });
+	};
+
 	result.getName = function(){
 	    var my_url = "rest/name/";
 	    return $http({

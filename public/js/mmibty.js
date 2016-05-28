@@ -1,4 +1,4 @@
 angular.module('mmibty',[
     'mmibty.controllers',
-    'mmibty.services'
-]);
+    'mmibty.services',
+    'mmibty.filters']);
