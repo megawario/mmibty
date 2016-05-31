@@ -62,7 +62,9 @@ module.exports = function(express,config,utils,database){
 	
     });
 
+    
     //add traks
+    //TODO should rollback if fails.
     router.post('/playlist/track/add',function(req,res){
 	log.debug("track to add: "+req.body.track_uri+" by user: "+req.connection.remoteAddress);
 	var track_uri = req.body.track_uri;
@@ -73,7 +75,7 @@ module.exports = function(express,config,utils,database){
 			if(err){ //TODO diferentiate error types
 			    res.sendStatus(500);
 			}
-			else{
+			else{ //success
 			    //add track to the playlist
 			    db.getAccessToken(function(err,access_token){
 				if(err){ //TODO diferentiate error
@@ -86,11 +88,23 @@ module.exports = function(express,config,utils,database){
 				    };
 				    
 				    request.post(authHeader,function(error, response, body){
-					console.log(error);
-					console.log(body);
-					if(error) res.sendStatus(500);
+					if(error) res.sendStatus(500); //failed TODO remove transaction
 					else{
+					    //successfully added in database
 					    res.sendStatus(200);
+
+					    //add to user info statistics
+					    authHeader.url = "https://api.spotify.com/v1/audio-features/"+track_uri.replace("spotify:track:","");
+					    log.debug(authHeader.url);
+					    request.get(authHeader,function(error,response,body){
+						if(err) log.err("Failed to add user info");
+						else{
+						    console.log("MA HOT BOD: "+JSON.stringify(body));
+						    db.addTrackInfo(user,user_name,body);
+						}
+					    });
+					  
+					    
 					}
 				    } )
 				}
