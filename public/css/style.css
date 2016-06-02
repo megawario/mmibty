@@ -1,10 +1,11 @@
 @import url("bootstrap.min.css");
-
+@import url("stat.css");
 /*
 body{
     background-color: #bbcc99;
 }
 */
+
 
 .jumbotron{
     background-image: url(../images/jumbotron.jpg);

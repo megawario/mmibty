@@ -10,6 +10,7 @@ angular.module('mmibty.controllers',
 	this.searchInput="";
 	this.searchResultArray=[];
 	this.isAdmin=false; //set administrator
+	this.userStats={};
 
 	//model for the playlist tracks
 	this.playlistTracks={};
@@ -84,9 +85,20 @@ angular.module('mmibty.controllers',
 			this.playlistTracksArray.push(response.data);
 		    }).bind(this),function(response){alert("error occured while searching")});
 	}
+
+	//fetch user musical stats
+	this.getUserStatus = function(){
+	    mmibtyAPI.getUserStats().then(
+		(function(response){
+		    this.userStats = response.data;
+		}).bind(this),function(){
+		    alert("error while fetching status");
+		}
+	    );
+	}
 	
 	this.getPlaylistTracks();
-
+	this.getUserStatus();
 	
 	//get name of machine:
 	mmibtyAPI.getName().then((function(response){
@@ -97,6 +109,8 @@ angular.module('mmibty.controllers',
 	mmibtyAPI.isAdmin().then((function(response){
 	    this.isAdmin=true;
 	}).bind(this));
+
+	
 	
 
     });

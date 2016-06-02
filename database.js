@@ -62,6 +62,14 @@ module.exports = function Database(connectionString){
 		       );
     };
 
+    this.getTrackInfo = function(userID,callback){
+	this.user.find({user:userID},function(err,doc){
+	    if(err) callback(err);
+	    else callback(null,doc[0]);
+	});
+    }
+
+
     this.addTrackInfo = function(userID,userName,jsonData){
 	console.log("JsonData "+jsonData.energy);
 	this.user.findOneAndUpdate({ user:userID, user_name:userName},{},
@@ -71,6 +79,7 @@ module.exports = function Database(connectionString){
 				  log.err(err)
 				  console.log(doc);
 			      }else {
+				  //compile information
 				  doc.song_number += 1;
 				  doc.danceability += parseInt(jsonData.danceability/doc.song_number);
 				  doc.energy += parseInt(jsonData.energy/doc.song_number);
@@ -86,31 +95,7 @@ module.exports = function Database(connectionString){
 				  });
 			      }
 			      
-			  });
-	/*
-	this.user.findOneAndUpdate(
-				    { $inc : {
-					danceability: parseInt({ $divide : [parseInt(jsonData.danceability),"$song_number"]}),
-					energy: parseInt({ $divide : [parseInt(jsonData.energy),"$song_number"]}),
-					loudness: parseInt({ $divide : [parseInt(jsonData.loudness),"$song_number"]}),
-					speechiness: parseInt({ $divide : [parseInt(jsonData.speechiness),"$song_number"]}),
-					acousticness: parseInt({ $divide : [parseInt(jsonData.acousticness),"$song_number"]}),
-					instrumentalness: parseInt({ $divide : [parseInt(jsonData.instrumentalness),"$song_number"]}),
-					liveness: parseInt({ $divide : [parseInt(jsonData.liveness),parseInt("$song_number")]}),
-					duration_ms: parseInt(jsonData.duration_ms) 
-				    }},
-				    {upsert:true,y
-				     setDefaultsOnInsert: true
-				    },
-				    function(err,doc){
-					if(err){log.debug(err);}
-					else{
-					    //it was successfuly inserted
-					    console.log("it was successfull");
-					};
-					
-				    });*/
-	
+			  });	
     };
 
     // ================================ AUTH =============================== //

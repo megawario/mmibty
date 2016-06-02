@@ -1,0 +1,100 @@
+/*
+Testing Hover
+*/
+
+.hover-hide {
+    display: none;
+    height:200px !important;
+    width:200px !important;
+    overflow:hidden;
+    margin:0px !important;
+    padding:2px;
+    text-align:center;
+}
+
+.hover-hide .h3 {
+    margin:3px !important;
+}
+.hover-hide .p {
+    margin:2px;
+}
+
+.stat {
+    margin-top:80%;
+    margin-bottom:5px;
+    margin-right:5px;
+    float:right;	  
+}
+
+
+.dance {
+    background-image: url("../images/dance.jpg");
+    color:white;
+    background-size:cover;
+}
+
+.dance:hover .hover-hide{
+    display:block;
+    color:black;
+    background-color:red; /*horrible collor*/
+}
+
+.dance:hover .hover-show{
+    display:none;
+}
+
+.energy {
+    background-image: url("../images/energy.jpg");
+    color:white;
+    background-size:cover;
+}
+
+.acoustic{
+    background-image: url("../images/acoustic.jpg");
+    color:white;
+    background-size:cover;
+}
+
+.live{
+    background-image: url("../images/live.jpg");
+    color:white;
+    background-size:cover;
+}
+
+.loud{
+    background-image: url("../images/loud.jpg");
+    color:white;
+    background-size:cover;
+}
+
+.speech{
+    background-image: url("../images/speech.jpg");
+    color:white;
+    background-size:cover;
+}
+
+.duration{
+    background-image: url("../images/duration.jpg");
+    color:white;
+    background-size:cover;
+}
+
+.valence{
+    background-image: url("../images/valence.jpg");
+    color:white;
+    background-size:cover;
+}
+
+.cubehover {
+    height:200px !important;
+    width:200px !important;
+    overflow: hidden;
+    margin:5px;
+    padding:0 !important;
+}
+
+
+.cubehover:hover {
+}
+
+

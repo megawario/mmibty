@@ -36,6 +36,14 @@ angular.module('mmibty.services',[])
 	    });
 	};
 
+	result.getUserStats = function(){
+	    var my_url = "rest/user/stats";
+	    return $http({
+		method: 'GET',
+		url: my_url
+	    });
+	};
+
 	//get playlist tracks
 	result.getPlaylistTracks = function(){
 	    var my_url = "rest/playlist/";
