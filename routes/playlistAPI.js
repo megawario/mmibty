@@ -39,6 +39,15 @@ module.exports = function(express,config,utils,database){
 	else res.sendStatus(500); //server Error
     });
 
+    // ============================================================= USER =================================================================================== //
+
+    router.get('/user/stats',function(req,res){
+	var remote = req.connection.remoteAddress;
+	db.getTrackInfo(remote,function(err,doc){
+	    if(err) res.sendStatus(500);
+	    else res.json(doc);
+	})
+    });
    
     // =============================================================================== PLAYLIST ============================================================= //
 
