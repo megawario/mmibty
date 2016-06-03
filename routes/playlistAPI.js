@@ -5,12 +5,14 @@ module.exports = function(express,config,utils,database){
     var request = require("request");
     var log = utils.log;
     var db = database;
+
+    //allways log access
     router.use(function logRequest(req,res,next){
 	log.info('request from '+req.ip+' to '+req.path);
 	next();
     });
 
-    //allways authorize remote address //TODO improve on performance by preprocessing requests here for information.
+    //allways authorize remote address
     router.use(function(req,res,next){
 	var remote = req.connection.remoteAddress;
 	log.debug("Checking auth for "+remote +"with config.auth: "+config.auth[remote]);
@@ -23,30 +25,29 @@ module.exports = function(express,config,utils,database){
 
     router.use(bodyParser.json());
 
-    //GET
-    //get name associated with the machine
-    router.get('/name/',function(req,res){
-	var remote =req.connection.remoteAddress;
-	if(remote!=="undefined") res.json({name:config.auth[remote]});
-	else res.sendStatus(500); //server Error
-    });
-
-    //checks if user is admin
-    router.get('/admin/',function(req,res){
-	var remote =req.connection.remoteAddress;
-	console.log("remote is: "+remote+" master "+config.master);
-	if(remote!=="undefined" && remote === config.master) res.sendStatus(200); //OK
-	else res.sendStatus(500); //server Error
-    });
-
     // ============================================================= USER =================================================================================== //
 
+    //gets user stats and info
     router.get('/user/stats',function(req,res){
 	var remote = req.connection.remoteAddress;
 	db.getTrackInfo(remote,function(err,doc){
 	    if(err) res.sendStatus(500);
 	    else res.json(doc);
 	})
+    });
+
+    //get name associated with the machine
+    router.get('/user/name/',function(req,res){
+	var remote =req.connection.remoteAddress;
+	if(remote!=="undefined") res.json({name:config.auth[remote]});
+	else res.sendStatus(500); //server Error
+    });
+
+    //checks if user is admin
+    router.get('/user/admin/',function(req,res){
+	var remote =req.connection.remoteAddress;
+	if(remote!=="undefined" && remote === config.master) res.sendStatus(200); //OK
+	else res.sendStatus(403); //not auth
     });
    
     // =============================================================================== PLAYLIST ============================================================= //
@@ -63,16 +64,13 @@ module.exports = function(express,config,utils,database){
 		    json: true
 		};
 		var request = new require("request");
-		request.get(authHeader,function(error, response, body){
-		    res.json(body);
-		} )
+		request.get(authHeader,function(error, response, body){ res.json(body); });
 	    }
 	});
 	
     });
 
-    
-    //add traks
+    //add tracks
     //TODO should rollback if fails.
     router.post('/playlist/track/add',function(req,res){
 	log.debug("track to add: "+req.body.track_uri+" by user: "+req.connection.remoteAddress);
@@ -124,20 +122,26 @@ module.exports = function(express,config,utils,database){
     
     // =============================================================================== AUTH ================================================================= //
     var querystring = require("querystring");
-    router.get('/login', function(req, res) {
 
-	var state = utils.randomString(16);
-	res.cookie('spotify_auth_state', state);
-1
-	// your application requests authorization
-	res.redirect('https://accounts.spotify.com/authorize?' +
-		     querystring.stringify({
-			 response_type: 'code',
-			 client_id: config.spot.clientID,
-			 scope: config.spot.scope,
-			 redirect_uri: config.spot.redirectURI,
-			 state: state
-		     }));
+    router.get('/login', function(req, res) {
+	//check if admin:
+	var remote = req.connection.remoteAddress;
+	if(remote!=="undefined" && remote === config.master){
+	    var state = utils.randomString(16);
+	    res.cookie('spotify_auth_state', state);
+
+	    // your application requests authorization
+	    res.redirect('https://accounts.spotify.com/authorize?' +
+			 querystring.stringify({
+			     response_type: 'code',
+			     client_id: config.spot.clientID,
+			     scope: config.spot.scope,
+			     redirect_uri: config.spot.redirectURI,
+			     state: state
+			 }));
+	}else{
+	    log.debug("Could not login - not admin");
+	}
     });
 
     //callback of auth

@@ -13,7 +13,7 @@ module.exports = function Database(connectionString){
     this.track = mongoose.model("track",new mongoose.Schema({track_uri:String,user:String,user_name:String}));
     this.user = mongoose.model("user",new mongoose.Schema({"user":String,
 							   "user_name":String,
-							   "song_number": { type: Number, default:1},
+							   "song_number": { type: Number, default:0},
 							   "danceability": {type: Number, default: 0},
 							   "energy": {type: Number, default: 0},
 							   "key": {type: Number, default: 0},
@@ -71,30 +71,30 @@ module.exports = function Database(connectionString){
 
 
     this.addTrackInfo = function(userID,userName,jsonData){
-	console.log("JsonData "+jsonData.energy);
 	this.user.findOneAndUpdate({ user:userID, user_name:userName},{},
 			  {upsert:true, new:true},
 			  function(err,doc){
 			      if(err){
-				  log.err(err)
+				  log.err(err);
 				  console.log(doc);
 			      }else {
 				  //compile information
+				  var prev_percent = doc.song_number/(doc.song_number+1);
 				  doc.song_number += 1;
-				  doc.danceability += parseInt(jsonData.danceability/doc.song_number);
-				  doc.energy += parseInt(jsonData.energy/doc.song_number);
-				  doc.loudness += parseInt(jsonData.loudness/doc.song_number);
-				  doc.speechiness +=parseInt(jsonData.speechiness/doc.song_number);
-				  doc.acousticness +=parseInt(jsonData.acousticness/doc.song_number);
-				  doc.instrumentalness +=parseInt(jsonData.instrumentalness/doc.song_number);
-				  doc.liveness += parseInt(jsonData.liveness/doc.song_number);
-				  doc.duration_ms +=parseInt(jsonData.duration_ms);
+				  doc.danceability = doc.danceability * prev_percent + jsonData.danceability/doc.song_number;
+				  doc.energy = doc.energy * prev_percent + jsonData.energy/doc.song_number;
+				  doc.loudness = doc.loudness * prev_percent + jsonData.loudness/doc.song_number;
+				  doc.speechiness = doc.speechiness * prev_percent + jsonData.speechiness/doc.song_number;
+				  doc.acousticness = doc.acousticness * prev_percent + jsonData.acousticness/doc.song_number;
+				  doc.instrumentalness = doc.instrumentalness * prev_percent + jsonData.instrumentalness/doc.song_number;
+				  doc.liveness = doc.liveness * prev_percent + jsonData.liveness/doc.song_number;
+				  doc.valence = doc.valence * prev_percent + jsonData.valence/doc.song_number;
+				  doc.duration_ms += jsonData.duration_ms;
 				  doc.save(function(err){
 				      if(err) log.err(err);
 				      else console.log("added with success");
 				  });
 			      }
-			      
 			  });	
     };
 

@@ -21,4 +21,18 @@ angular.module('mmibty.filters',[])
 		    }	    
 		    return value + (tail || ' …');
 		};
-	    });
+	    })
+//convert ms to hh:mm
+    .filter('mstotime', function() {
+	return function(millseconds) {
+	    var seconds = Math.floor(millseconds / 1000);
+	    var days = Math.floor(seconds / 86400);
+	    var hours = Math.floor((seconds % 86400) / 3600);
+	    var minutes = Math.floor(((seconds % 86400) % 3600) / 60);
+	    var timeString = '';
+	    //if(days > 0) timeString += days;
+	    if(hours > 0) timeString += hours + ":";
+	    if(minutes >= 0) timeString += minutes;
+	    return timeString;
+	}
+    });

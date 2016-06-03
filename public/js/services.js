@@ -12,30 +12,33 @@ angular.module('mmibty.services',[])
 	    });
 	};
 
-	result.getURL = function(url){
-	    var my_url = url;
-	    return $http({
-		method: 'GET',
-		url: my_url
-	    });
-	};
-
-	result.getName = function(){
-	    var my_url = "rest/name/";
-	    return $http({
-		method: 'GET',
-		url: my_url
-	    });
-	};
-
+	//check if user is admin
 	result.isAdmin = function(){
-	    var my_url = "rest/admin/";
+	    var my_url = "rest/user/admin/";
 	    return $http({
 		method: 'GET',
 		url: my_url
 	    });
 	};
 
+	result.login = function(){
+	    var my_url = "rest/login";
+	    return $http({
+		method: 'GET',
+		url: my_url
+	    });
+	}
+
+	//get user name associated with machine
+	result.getName = function(){
+	    var my_url = "rest/user/name/";
+	    return $http({
+		method: 'GET',
+		url: my_url
+	    });
+	};
+
+	//get user trackstatistics and info
 	result.getUserStats = function(){
 	    var my_url = "rest/user/stats";
 	    return $http({
@@ -60,6 +63,15 @@ angular.module('mmibty.services',[])
 		method: 'POST',
 		url: my_url,
 		data: payload
+	    });
+	};
+
+	//gets generic URL
+	result.getURL = function(url){
+	    var my_url = url;
+	    return $http({
+		method: 'GET',
+		url: my_url
 	    });
 	};
 	

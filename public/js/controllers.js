@@ -15,6 +15,16 @@ angular.module('mmibty.controllers',
 	//model for the playlist tracks
 	this.playlistTracks={};
 	this.playlistTracksArray=[];
+
+	this.login = function(){
+	    mmibtyAPI.login().then(
+		function(response){
+		    alert("Login successfull!!!");
+		},function(){
+		    alert("Login failed!!!");
+		}
+	    );
+	};
 	
 	//removes go function
 	this.go = function(){
@@ -35,6 +45,7 @@ angular.module('mmibty.controllers',
 		(function(response){
 		    if(response.status==200){
 			this.getPlaylistTracks(); //refresh playlist
+			this.getUserStatus(); //refresh user stats
 			//TODO do something with the response if needed.
 		    }
 		    else{alert("problem occured when adding music");}

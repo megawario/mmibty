@@ -2,6 +2,11 @@
 Testing Hover
 */
 
+.center-row {
+    float:none;
+    margin:0 auto;
+    width:80%;
+}
 .hover-hide {
     display: none;
     height:200px !important;
@@ -36,7 +41,7 @@ Testing Hover
 .dance:hover .hover-hide{
     display:block;
     color:black;
-    background-color:red; /*horrible collor*/
+    background-color:#ED9121; /*carrot*/
 }
 
 .dance:hover .hover-show{
@@ -49,10 +54,30 @@ Testing Hover
     background-size:cover;
 }
 
+.energy:hover .hover-hide{
+    display:block;
+    color:black;
+    background-color:#EEC900; /*gold2*/
+}
+
+.energy:hover .hover-show{
+    display:none;
+}
+
 .acoustic{
     background-image: url("../images/acoustic.jpg");
     color:white;
     background-size:cover;
+}
+
+.acoustic:hover .hover-hide{
+    display:block;
+    color:black;
+    background-color:#BCEE68; /*dark olive green*/
+}
+
+.acoustic:hover .hover-show{
+    display:none;
 }
 
 .live{
@@ -61,10 +86,30 @@ Testing Hover
     background-size:cover;
 }
 
+.live:hover .hover-hide{
+    display:block;
+    color:black;
+    background-color:#00CDCD; /*cyan*/
+}
+
+.live:hover .hover-show{
+    display:none;
+}
+
 .loud{
     background-image: url("../images/loud.jpg");
     color:white;
     background-size:cover;
+}
+
+.loud:hover .hover-hide{
+    display:block;
+    color:black;
+    background-color:#CD3278; /*violet red*/
+}
+
+.loud:hover .hover-show{
+    display:none;
 }
 
 .speech{
@@ -73,16 +118,46 @@ Testing Hover
     background-size:cover;
 }
 
+.speech:hover .hover-hide{
+    display:block;
+    color:black;
+    background-color:#4876FF; /*royal blue*/
+}
+
+.speech:hover .hover-show{
+    display:none;
+}
+
 .duration{
     background-image: url("../images/duration.jpg");
     color:white;
     background-size:cover;
 }
 
+.duration:hover .hover-hide{
+    display:block;
+    color:black;
+    background-color:#B22222; /*firebrick*/
+}
+
+.duration:hover .hover-show{
+    display:none;
+}
+
 .valence{
     background-image: url("../images/valence.jpg");
     color:white;
     background-size:cover;
+}
+
+.valence:hover .hover-hide{
+    display:block;
+    color:black;
+    background-color:#388E8E; /*teal*/
+}
+
+.valence:hover .hover-show{
+    display:none;
 }
 
 .cubehover {
@@ -94,7 +169,5 @@ Testing Hover
 }
 
 
-.cubehover:hover {
-}
 
 
