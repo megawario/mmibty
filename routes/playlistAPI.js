@@ -4,17 +4,18 @@ module.exports = function(express,config,utils,database){
     var bodyParser= require("body-parser");
     var request = require("request");
     var log = utils.log;
+    var ipv4 = utils.ipv4;
     var db = database;
 
     //allways log access
     router.use(function logRequest(req,res,next){
-	log.info('request from '+req.ip+' to '+req.path);
-	next();
+	    log.info('request from '+ipv4(req.ip)+' to '+req.path);
+	    next();
     });
 
     //allways authorize remote address
     router.use(function(req,res,next){
-	var remote = req.connection.remoteAddress;
+	    var remote = ipv4(req.connection.remoteAddress);
 	log.debug("Checking auth for "+remote +"with config.auth: "+config.auth[remote]);
 	if(config.auth[remote] === "undefined"){
 	    res.sendStatus(403); //TODO redirect to forbidden page
@@ -29,23 +30,23 @@ module.exports = function(express,config,utils,database){
 
     //gets user stats and info
     router.get('/user/stats',function(req,res){
-	var remote = req.connection.remoteAddress;
-	db.getTrackInfo(remote,function(err,doc){
-	    if(err) res.sendStatus(500);
-	    else res.json(doc);
-	})
-    });
-
+	    var remote = ipv4(req.connection.remoteAddress);
+	    db.getTrackInfo(remote,function(err,doc){
+		    if(err) res.sendStatus(500);
+		    else res.json(doc);
+	    })
+		});
+    
     //get name associated with the machine
     router.get('/user/name/',function(req,res){
-	var remote =req.connection.remoteAddress;
+	    var remote =ipv4(req.connection.remoteAddress);
 	if(remote!=="undefined") res.json({name:config.auth[remote]});
 	else res.sendStatus(500); //server Error
     });
 
     //checks if user is admin
     router.get('/user/admin/',function(req,res){
-	var remote =req.connection.remoteAddress;
+	    var remote =ipv4(req.connection.remoteAddress);
 	if(remote!=="undefined" && remote === config.master) res.sendStatus(200); //OK
 	else res.sendStatus(403); //not auth
     });
@@ -56,7 +57,7 @@ module.exports = function(express,config,utils,database){
     router.get('/playlist/',function(req,res){
 	db.getAccessToken(function(err,access_token){
 	    if(err){
-		req.sendStatus(500);
+		res.sendStatus(500);
 	    }else{
 		var authHeader= {
 		    url: "https://api.spotify.com/v1/users/"+config.spot.userid+"/playlists/"+config.spot.playlist+"/tracks",
@@ -81,7 +82,7 @@ module.exports = function(express,config,utils,database){
     router.post('/playlist/track/add',function(req,res){
 	log.debug("track to add: "+req.body.track_uri+" by user: "+req.connection.remoteAddress);
 	var track_uri = req.body.track_uri;
-	var user = req.connection.remoteAddress;
+	var user = ipv4(req.connection.remoteAddress);
 	var user_name = config.auth[user];
 	db.addTrack({'track_uri':track_uri,'user':user,'user_name':user_name},
 		    function(err){
@@ -130,9 +131,8 @@ module.exports = function(express,config,utils,database){
 
     router.get('/login', function(req, res) {
 	//check if admin:
-	var remote = req.connection.remoteAddress;
-	console.log("configMaster "+config.master);
-	if(typeof remote!=undefined && remote === config.master){
+	var remote = ipv4(req.connection.remoteAddress);
+	if(remote!=="undefined" && remote === config.master){
 	    var state = utils.randomString(16);
 	    res.cookie('spotify_auth_state', state);
 

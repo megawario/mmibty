@@ -120,9 +120,14 @@ module.exports = function Database(connectionString){
     //fetch
     this.getAccessToken = function(callback){
 	this.accessToken.find({},function(err,docs){
-	    var access_token = docs[0].access_token;
-	    callback(err,access_token);
-	    
+		if(err ||docs[0]==undefined){
+		    err = "could not fetch the access token from database";
+		    log.err(err);
+		    callback(err);
+		}else{
+		    var access_token = docs[0].access_token;
+		    callback(err,access_token);
+		}
 	});
     };
 
