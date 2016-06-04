@@ -1,10 +1,29 @@
 @import url("bootstrap.min.css");
 @import url("stat.css");
-/*
-body{
-    background-color: #bbcc99;
+
+.fav-remove:hover{
+    color:red;
 }
-*/
+
+.fav-remove{
+    color:green;
+}
+.fav:hover{
+    color:green;
+}
+
+.del-remove:hover{
+    color:green;
+}
+
+.del-remove{
+    color:red;
+}
+
+.del:hover{
+    color:red;
+}
+
 
 
 
@@ -65,4 +84,8 @@ body{
 }
 .caption-small{
     margin-bottom:20px;
+}
+
+.caption-nomargin{
+    margin: 0px;
 }

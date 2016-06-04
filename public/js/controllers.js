@@ -12,6 +12,22 @@ angular.module('mmibty.controllers',
 	this.isAdmin=false; //set administrator
 	this.userStats={};
 
+	this.love=false;
+	this.hate=false;
+	
+	this.getLove = function(url){return this.love};
+	this.getHate = function(url){return this.hate};
+
+	this.setLove = function(url){
+	    mmibtyAPI.setLove(url).then(
+		(function(response){this.getLove(response.data.track_uri);}).bind(this),
+					function(){alert("failed on seting Love");});
+	};
+	this.setHate = function(url){
+	    mmibtyAPI.setHate(url).then(
+		(function(response){this.getHate(response.data.track_uri);}).bind(this),function(){alert("failed on setting Hate");});
+	};
+	
 	//model for the playlist tracks
 	this.playlistTracks={};
 	this.playlistTracksArray=[];
@@ -20,7 +36,7 @@ angular.module('mmibty.controllers',
 	    mmibtyAPI.login().then(
 		function(response){
 		    alert("Login successfull!!!");
-		},function(){
+		},function(response){
 		    alert("Login failed!!!");
 		}
 	    );

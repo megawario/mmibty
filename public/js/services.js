@@ -38,6 +38,26 @@ angular.module('mmibty.services',[])
 	    });
 	};
 
+	//when a user loves a track
+	result.setLove = function(uri){
+	    var my_url = "rest/user/love";
+	    return $http({
+		method: 'POST',
+		url: my_url,
+		data:{"track_uri":uri}
+	    });
+	};
+
+	//when a user hates a track
+	result.setHate = function(uri){
+	    var my_url = "rest/user/hate";
+	    return $http({
+		method: 'POST',
+		url: my_url,
+		data:{"track_uri":uri}
+	    });
+	};
+
 	//get user trackstatistics and info
 	result.getUserStats = function(){
 	    var my_url = "rest/user/stats";
@@ -46,6 +66,8 @@ angular.module('mmibty.services',[])
 		url: my_url
 	    });
 	};
+
+	
 
 	//get playlist tracks
 	result.getPlaylistTracks = function(){

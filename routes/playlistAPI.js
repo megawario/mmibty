@@ -64,7 +64,13 @@ module.exports = function(express,config,utils,database){
 		    json: true
 		};
 		var request = new require("request");
-		request.get(authHeader,function(error, response, body){ res.json(body); });
+		request.get(authHeader,function(error, response, body){
+		    //TODO modify the request to send info about song preference here
+
+
+		    res.json(body);
+
+		});
 	    }
 	});
 	
@@ -106,7 +112,6 @@ module.exports = function(express,config,utils,database){
 					    request.get(authHeader,function(error,response,body){
 						if(err) log.err("Failed to add user info");
 						else{
-						    console.log("MA HOT BOD: "+JSON.stringify(body));
 						    db.addTrackInfo(user,user_name,body);
 						}
 					    });
@@ -126,7 +131,8 @@ module.exports = function(express,config,utils,database){
     router.get('/login', function(req, res) {
 	//check if admin:
 	var remote = req.connection.remoteAddress;
-	if(remote!=="undefined" && remote === config.master){
+	console.log("configMaster "+config.master);
+	if(typeof remote!=undefined && remote === config.master){
 	    var state = utils.randomString(16);
 	    res.cookie('spotify_auth_state', state);
 
@@ -195,7 +201,8 @@ module.exports = function(express,config,utils,database){
 		    //store tokens in database
 		    db.storeAccessToken({"access_token":access_token});
 		    db.storeRefreshToken({"refresh_token":refresh_token});
-		    res.sendStatus(200);
+		    res.redirect(200, config.server.path);
+		    
 		} else { //INVALID redirect
 		    res.sendStatus(500);
 		}
