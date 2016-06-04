@@ -79,16 +79,14 @@
 		<div class="thumbnail" >
 		  <img class="thumb-img" ng-src="{{t.album.images[1].url}}" alt="album image">
 		  <div class="caption">
-		    <h4 data-toggle="tooltip" title="{{t.name}}" >{{t.name | cutwords:true:25:'...'}}</h4>
+		    <h4 title="{{t.name}}" >{{t.name | cutwords:true:25:'...'}}</h4>
 		    <h5>by: <a href={{t.artists[0].external_url.spotify}} >{{t.artists[0].name}}</a></h5>
-		    <p>
-		      <i class="material-icons">favorite</i> {{t.popularity}}
-		      <i class="material-icons">av_timer</i> {{t.duration_ms | date:'mm:ss'}}
-		    </p>
-		    <p>
-		      <a href="#" class="btn btn-primary" role="button" ng-click="mm.addTrack(t.uri)"><i class="material-icons">add</i></a>
-		      <a href="{{t.preview_url}}" class="btn btn-primary" role="button"><i class="material-icons">play_arrow</i></a>
-		    </p>
+		    <div class="favtime">
+		      <i class="material-icons">favorite</i> <p>{{t.popularity}}</p>
+		      <i class="material-icons">av_timer</i> <p>{{t.duration_ms | date:'mm:ss'}}</p>
+		      <a href="" title="add track"><i class="material-icons addbtn" ng-click="mm.addTrack(t.uri)">add</i></a>
+		      <a href="{{t.preview_url}}" title="preview" ><i class="material-icons prevbtn">play_arrow</i></a>
+		    </div>
 		  </div>
 		</div>
 	      </div>
@@ -100,14 +98,14 @@
 	</div>
 	<!--  User information -->
 	<div ng-show="mm.selected(1)">
-	  <h2 class="text-center">{{mm.name}} you contributed with {{mm.userStats.song_number}} awesome songs </h2>
+	  <h2 class="text-center">{{mm.name}} you contributed with {{mm.userStats.song_number>0 ? mm.userStats.song_number : 0  }} awesome songs </h2>
 	  <div>
 	    <div class="row">
 	      <div class="center-row">
 		
 		<div class="cubehover dance col-sm-6 col-md-3">
 		  <div class="hover-show">
-		    <h1 class="stat">{{mm.userStats.danceability | number : 2}}</h1>
+		    <h1 class="stat stat-dance">{{mm.userStats.danceability | number : 2}}</h1>
 		  </div>
 		  <div class="hover-hide">
 		    <h3>[ Danceability ]</h3>
@@ -117,7 +115,7 @@
 		
 		<div class="cubehover energy col-sm-6 col-md-3">
 		  <div class="hover-show">
-		    <h1 class="stat">{{mm.userStats.energy | number : 2}}</h1>
+		    <h1 class="stat stat-energy">{{mm.userStats.energy | number : 2}}</h1>
 		  </div>
 		  <div class="hover-hide">
 		    <h3>[ Energy ]</h3>
@@ -127,7 +125,7 @@
 
 		<div class="cubehover acoustic col-sm-6 col-md-3">
 		  <div class="hover-show">
-		    <h1 class="stat">{{mm.userStats.acousticness | number : 2 }}</h1>
+		    <h1 class="stat stat-acoustic">{{mm.userStats.acousticness | number : 2 }}</h1>
 		  </div>
 		  <div class="hover-hide">
 		    <h3>[ Acousticness ]</h3>
@@ -137,7 +135,7 @@
 		
 		<div class="cubehover valence col-sm-6 col-md-3">
 		  <div class="hover-show">
-		    <h1 class="stat">{{mm.userStats.valence | number : 2}}</h1>
+		    <h1 class="stat stat-valence">{{mm.userStats.valence | number : 2}}</h1>
 		  </div>
 		  <div class="hover-hide">
 		    <h3>[ Valence ]</h3>
@@ -151,7 +149,7 @@
 	      <div class="center-row">
 		<div class="cubehover live col-sm-6 col-md-3">
 		  <div class="hover-show">
-		    <h1 class="stat">{{mm.userStats.liveness | number : 2}}</h1>
+		    <h1 class="stat stat-live">{{mm.userStats.liveness | number : 2}}</h1>
 		  </div>
 		  <div class="hover-hide">
 		    <h3>[ Liveness ]</h3>
@@ -161,7 +159,7 @@
 
 		<div class="cubehover loud col-sm-6 col-md-3">
 		  <div class="hover-show">
-		    <h1 class="stat">{{mm.userStats.loudness | number : 2}}</h1>
+		    <h1 class="stat stat-loud">{{mm.userStats.loudness | number : 2}}</h1>
 		  </div>
 		  <div class="hover-hide">
 		    <h3>[ Loudness ]</h3>
@@ -171,7 +169,7 @@
 
 		<div class="cubehover speech col-sm-6 col-md-3">
 		  <div class="hover-show">
-		    <h1 class="stat">{{mm.userStats.speechiness | number : 2}}</h1>
+		    <h1 class="stat stat-speech">{{mm.userStats.speechiness | number : 2}}</h1>
 		  </div>
 		  <div class="hover-hide">
 		    <h3>[ Speechiness ]</h3>
@@ -181,7 +179,7 @@
 
 		<div class="cubehover duration col-sm-6 col-md-3">
 		  <div class="hover-show">
-		    <h1 class="stat">{{mm.userStats.duration_ms | mstotime }}</h1>
+		    <h1 class="stat stat-duration">{{mm.userStats.duration_ms | mstotime }}</h1>
 		  </div>
 		  <div class="hover-hide">
 		    <h3>[ Duration ]</h3>

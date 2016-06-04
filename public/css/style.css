@@ -1,6 +1,32 @@
 @import url("bootstrap.min.css");
 @import url("stat.css");
 
+
+.favtime {
+	 display:inline-flex;	
+	 margin: 2px;
+	 margin-left:0px;
+}
+.favtime i{
+	 margin-right: 1px;
+}
+.favtime p{
+	 margin:0;
+	 margin-right:4px;
+} 
+
+.btn-add{
+	float:right;
+}
+
+.addbtn:hover {
+	color:green;	
+}
+
+.prevbtn:hover{
+	color:green;
+}
+
 .fav-remove:hover{
     color:red;
 }
