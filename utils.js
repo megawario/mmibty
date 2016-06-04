@@ -20,6 +20,12 @@ var logger =  function (string,level){
 
 var utils={};
 
+//replaces ipv6 address by a ipv4 one
+utils.ipv4 = function(address){
+    return address.replace(/::.*:/g,"");
+};
+
+//uses randomString
 utils.randomString = function(length) {
     var text = '';
     var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
