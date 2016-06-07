@@ -51,6 +51,8 @@ angular.module('mmibty.controllers',
 					(function(response){
 						if(response.status==200){
 							this.adminGetUsers(); //refresh view
+							this.admin_new_user_ip="";
+							this.admin_new_user_name="";
 						}
 						else{alert("error adding");} //TODO add nice looking error msg
 					}).bind(this)
