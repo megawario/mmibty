@@ -12,6 +12,31 @@ angular.module('mmibty.services',[])
 	    });
 	};
 
+		//======= admin services =======//
+
+		result.adminCreateUser=function(userID,userName){
+			return $http({
+				method: 'POST',
+				url: "admin/createuser",
+				data:{"userID":userID,"userName":userName}
+			});
+		};
+		
+		result.adminRemoveUser=function(userID){
+			return $http({
+				method: 'POST',
+				url: "admin/removeuser",
+				data:{"userID":userID}
+			});
+		};
+
+		result.adminGetUsers=function(){
+			return $http({
+				method: 'GET',
+				url: "admin/users"
+			});
+		};
+		
 	//check if user is admin
 	result.isAdmin = function(){
 	    var my_url = "rest/user/admin/";
@@ -96,6 +121,7 @@ angular.module('mmibty.services',[])
 		url: my_url
 	    });
 	};
+
 	
 	return result;
     });

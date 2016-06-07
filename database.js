@@ -11,22 +11,7 @@ module.exports = function Database(connectionString){
     this.accessToken = mongoose.model('accessToken',new  mongoose.Schema({access_token:String},{ strict: false }));
     this.refreshToken = mongoose.model('refreshToken',new mongoose.Schema({refresh_token:String}, { strict: false }));
     this.track = mongoose.model("track",new mongoose.Schema({track_uri:String,user:String,user_name:String}));
-    this.user = mongoose.model("user",new mongoose.Schema({"user":String,
-							   "user_name":String,
-							   "song_number": { type: Number, default:0},
-							   "danceability": {type: Number, default: 0},
-							   "energy": {type: Number, default: 0},
-							   "key": {type: Number, default: 0},
-							   "loudness": {type: Number, default: 0},
-							   "mode": {type: Number, default: 0},
-							   "speechiness": {type: Number, default: 0},
-							   "acousticness": {type: Number, default: 0},
-							   "instrumentalness": {type: Number, default: 0},
-							   "liveness": {type: Number, default: 0},
-							   "valence": {type: Number, default: 0},
-							   "tempo": {type: Number, default: 0},
-							   "duration_ms": {type: Number, default: 0}
-							  }));
+    this.user = require('./models/users');
     
     //connection events:
     this.mongoose.connection.on('connected',function(){
@@ -39,7 +24,49 @@ module.exports = function Database(connectionString){
 	log.warning('Mongoose disconnected');
     });
 
-    //
+    //=================================================== STATS ===========================================//
+
+    //feed server statistic
+    this.getServerStats = function(){};
+
+    //feed playlist statistic
+    //will consist of: top user for each "your music" category total playtime
+    this.getPlaylistStats = function(callback){
+	//fetch max
+	var queryMaxSong = this.user.findOne({}).sort({song_number:-1});
+	var queryMaxValence = this.user.findOne({}).sort({valence:-1});
+	var queryMaxDuration = this.user.findOne({}).sort({duration_ms:-1});
+	var queryMaxAcoustic = this.user.findOne({}).sort({acousticness:-1});
+	var queryMaxIntrumental = this.user.findOne({}).sort({instrumentalness:-1});
+	var queryMaxLiveness = this.user.findOne({}).sort({liveness:-1});
+	var queryMaxLoudness = this.user.findOne({}).sort({loudness:-1});
+	var queryMaxEnergy = this.user.findOne({}).sort({energy:-1});
+	var queryMaxDance = this.user.findOne({}).sort({dancebility:-1});
+
+	//fetch min
+	var queryMinSong = this.user.findOne({}).sort({song_number:1});
+	var queryMinValence = this.user.findOne({}).sort({valence:1});
+	var queryMinDuration = this.user.findOne({}).sort({duration_ms:1});
+	var queryMinAcoustic = this.user.findOne({}).sort({acousticness:1});
+	var queryMinIntrumental = this.user.findOne({}).sort({instrumentalness:1});
+	var queryMinLiveness = this.user.findOne({}).sort({liveness:1});
+	var queryMinLoudness = this.user.findOne({}).sort({loudness:1});
+	var queryMinEnergy = this.user.findOne({}).sort({energy:1});
+	var queryMinDance = this.user.findOne({}).sort({dancebility:1});
+	
+	var result = {};
+
+	queryMaxSong.exec().bind(result).then(
+				 function(doc){this.maxSong={name:doc.user_name,song_number:doc.song_number};}
+				 );
+	console.log("result is:" +result.maxSong);
+	console.log("MY max result is: "+result.maxSong.name+result.maxSong.song_number);
+    
+    //fetch min
+    
+    }
+
+    //=================================================== PLAYLIST ========================================//
     //set track - this adds track to the database. it track exists it will do nothing.
     this.addTrack = function(json,callback){
 	//json will contain track_id, machine_ip and user name
@@ -97,6 +124,35 @@ module.exports = function Database(connectionString){
 			      }
 			  });	
     };
+
+	// ================================ Admin Ops =============================== //
+
+	//adds new user to database
+	this.adminAddUser = function(userID,userName,callback){
+		this.user.findOneAndUpdate({user:userID, user_name:userName},{},
+			{upsert:true, new:true},
+			function(err,doc){
+				//TODO process necessary info
+				return callback(err);
+			}
+		);
+
+	};
+	//removes new user to database and does cleanup
+	this.adminRemoveUser = function(userID,callback){
+		this.user.findOneAndRemove({user:userID},function(err,doc){
+			//todo process cleanup here
+			return callback(err);
+		})
+	};
+
+	this.adminGetUsers = function(callback){
+		this.user.find({},'user user_name',function(err,docs){
+			return callback(err,docs);
+			if(err) return callback(err);
+			else return callback(err,doc)
+		})
+	};
 
     // ================================ AUTH =============================== //
     //store refresh and auth tokens:

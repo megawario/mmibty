@@ -21,10 +21,12 @@ process.on('uncaughtException',function(err){
 var database = require('./database.js')(config.server.dbURL);
 var express = require('express');
 var app = express();
-var routes = require("./routes/playlistAPI.js")(express,config,utils,database);
 
+var routes = require("./routes/playlistAPI.js")(express,config,utils,database);
+var adminRoute = require("./routes/adminAPI.js")(express,config,utils,database);
 
 app.use(config.server.path+"/rest",routes);
+app.use(config.server.path+"/admin",adminRoute);
 
 //serve static pages:
 app.use(config.server.path,express.static(__dirname + '/public'));

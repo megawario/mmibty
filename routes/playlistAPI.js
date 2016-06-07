@@ -53,6 +53,9 @@ module.exports = function(express,config,utils,database){
    
     // =============================================================================== PLAYLIST ============================================================= //
 
+    router.get('/playlist/status',function(req,res){
+	    db.getPlaylistStats();
+	});
     //gets track on group playlist
     router.get('/playlist/',function(req,res){
 	db.getAccessToken(function(err,access_token){

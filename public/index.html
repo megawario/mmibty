@@ -1,206 +1,210 @@
 <!DOCTYPE html lang="pt">
 <html ng-app='mmibty'>
-  <head>
-    <title>My Music Is Better Than Yours</title>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="=viewport" content="width=device-width,initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="css/style.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <script src="js/jquery-2.2.0.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-cookies.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-animate.js"></script>
+<head>
+	<title>My Music Is Better Than Yours</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="=viewport" content="width=device-width,initial-scale=1">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+	<script src="js/jquery-2.2.0.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-cookies.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-animate.js"></script>
 
-    <!-- BootStrap -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<!-- BootStrap -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<script src="js/bootbox.min.js"></script>
+	<!-- Angular scripts -->
+	<script src="js/mmibty.js"></script>
+	<script src="js/services.js"></script>
+	<script src="js/controllers.js"></script>
+	<script src="js/filters.js"></script>
+	<script src="js/bootbox.js"></script>
 
-    <!-- Angular scripts -->
-    <script src="js/mmibty.js"></script>
-    <script src="js/services.js"></script>
-    <script src="js/controllers.js"></script>
-    <script src="js/filters.js"></script>
+</head>
+<body ng-controller="mmibtyController as mm">
+<div class="container">
+	<div class="jumbotron">
+		<div class="page-header">
+			<h1>My music is better than yours <small>FUNdão edition</small></h1>
+		</div>
 
-  </head>
-  <body ng-controller="mmibtyController as mm">
-    <div class="container">
-      <div class="jumbotron">
-	<div class="page-header">
-	  <h1>My music is better than yours <small>FUNdão edition</small></h1>
+		<!--
+            <div>
+              <div class="input-group input-group-lg">
+            <span class="input-group-addon" id="sizing-addon1">@</span>
+            <input type="text" class="form-control"
+                   placeholder="Today i am feeling ... "
+                   aria-describedby="sizing-addon1"
+                   ng-model="mm.feels">
+            <span class="input-group-btn">
+              <button class="btn btn-default" type="button" ng-click="mm.go()">Post</button>
+            </span>
+              </div>
+            </div>
+            -->
 	</div>
-	<div ng-show="mm.isAdmin" class="admin-panel">
-	  <a href="rest/login">Log in</a>
-	</div>
-	<!--
-	    <div>
-	      <div class="input-group input-group-lg">
-		<span class="input-group-addon" id="sizing-addon1">@</span>
-		<input type="text" class="form-control"
-		       placeholder="Today i am feeling ... "
-		       aria-describedby="sizing-addon1"
-		       ng-model="mm.feels">
-		<span class="input-group-btn">
-		  <button class="btn btn-default" type="button" ng-click="mm.go()">Post</button>
-		</span>
-	      </div>
-	    </div>
-	    -->
-      </div>
-      
-      <div class="container">
-	<div>
-	  <ul class="nav nav-pills">
-	    <li role="presentation" ng-class="{active: mm.selected(0)}"><a href="#" ng-click="mm.selectedTab=0">Pick</a></li>
-	    <li role="presentation" ng-class="{active: mm.selected(1)}"><a href="#" ng-click="mm.selectedTab=1">Your music</a></li>
-	    <li role="presentation" ng-class="{active: mm.selected(2)}"><a href="#" ng-click="mm.selectedTab=2">Our music</a></li>
-	    <li role="presentation" ng-class="{active: mm.selected(3)}"><a href="#" ng-click="mm.selectedTab=3">Is better</a></li>
-	  </ul>
-	</div>
-	
-	<div ng-show="mm.selected(0)">
-	  <!-- search bar -->
-	  <div class="input-group input-group-lg search-bar">
-	    <input type="text"
-		   class="form-control"
-		   placeholder="Search for artist or music"
-		   aria-describedby="sizing-addon1"
-		   ng-model="mm.searchInput"
-		   ng-keypress="mm.keypressSearch($event)">
+
+	<div class="container">
+		<div>
+			<ul class="nav nav-pills">
+				<li role="presentation" ng-class="{active: mm.selected(0)}"><a href="#" ng-click="mm.selectedTab=0">Pick</a></li>
+				<li role="presentation" ng-class="{active: mm.selected(1)}"><a href="#" ng-click="mm.selectedTab=1">Your music</a></li>
+				<li role="presentation" ng-class="{active: mm.selected(2)}"><a href="#" ng-click="mm.selectedTab=2">Our music</a></li>
+				<li role="presentation" ng-class="{active: mm.selected(3)}"><a href="#" ng-click="mm.selectedTab=3">Is better</a></li>
+				<li role="presentation" ng-show="mm.isAdmin" ng-class="{active: mm.selected(4)}"><a href="#" ng-click="mm.selectedTab=4">I am Admin</a></li>
+			</ul>
+		</div>
+
+		<div ng-show="mm.selected(0)">
+			<!-- search bar -->
+			<div class="input-group input-group-lg search-bar">
+				<input type="text"
+					   class="form-control"
+					   placeholder="Search for artist or music"
+					   aria-describedby="sizing-addon1"
+					   ng-model="mm.searchInput"
+					   ng-keypress="mm.keypressSearch($event)">
 	    <span class="input-group-btn">
 	      <button class="btn btn-default" type="button" ng-click="mm.searchTrack()"><i class="material-icons">search</i></button>
 	    </span>
-	  </div>
+			</div>
 
-	  <!-- display search bar results -->
-	  <div class="row">
-	    <div ng-repeat="pages in mm.searchResultArray">
-	      <div class="col-sm-6 col-md-3" ng-repeat="t in pages.tracks.items | orderBy:'-popularity'">
+			<!-- display search bar results -->
+			<div class="row">
+				<div ng-repeat="pages in mm.searchResultArray">
+					<div class="col-sm-6 col-md-3" ng-repeat="t in pages.tracks.items | orderBy:'-popularity'">
 
-		<div class="thumbnail" >
-		  <img class="thumb-img" ng-src="{{t.album.images[1].url}}" alt="album image">
-		  <div class="caption">
-		    <h4 title="{{t.name}}" >{{t.name | cutwords:true:25:'...'}}</h4>
-		    <h5>by: <a href={{t.artists[0].external_url.spotify}} >{{t.artists[0].name}}</a></h5>
-		    <div class="favtime">
-		      <i class="material-icons">favorite</i> <p>{{t.popularity}}</p>
-		      <i class="material-icons">av_timer</i> <p>{{t.duration_ms | date:'mm:ss'}}</p>
-		      <a href="" title="add track"><i class="material-icons addbtn" ng-click="mm.addTrack(t.uri)">add</i></a>
-		      <a href="{{t.preview_url}}" title="preview" ><i class="material-icons prevbtn">play_arrow</i></a>
-		    </div>
-		  </div>
-		</div>
-	      </div>
-	    </div>
-	    <!-- Check if there are more results on search  -->
-	    <div class="btn-block" ng-show="mm.searchResultArray[mm.searchResultArray.length-1].tracks.next!=null"><a class="btn btn-default see-more" ng-click="mm.getMoreTracks(mm.searchResultArray[mm.searchResultArray.length-1].tracks.next)">See more results</a></div>
-	  </div>
-	  
-	</div>
-	<!--  User information -->
-	<div ng-show="mm.selected(1)">
-	  <h2 class="text-center">{{mm.name}} you contributed with {{mm.userStats.song_number>0 ? mm.userStats.song_number : 0  }} awesome songs </h2>
-	  <div>
-	    <div class="row">
-	      <div class="center-row">
-		
-		<div class="cubehover dance col-sm-6 col-md-3">
-		  <div class="hover-show">
-		    <h1 class="stat stat-dance">{{mm.userStats.danceability | number : 2}}</h1>
-		  </div>
-		  <div class="hover-hide">
-		    <h3>[ Danceability ]</h3>
-		    <p>How suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity.</p>
-		  </div>
-		</div>
-		
-		<div class="cubehover energy col-sm-6 col-md-3">
-		  <div class="hover-show">
-		    <h1 class="stat stat-energy">{{mm.userStats.energy | number : 2}}</h1>
-		  </div>
-		  <div class="hover-hide">
-		    <h3>[ Energy ]</h3>
-		    <p>Energy is a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. Typically, energetic tracks feel fast, loud, and noisy.</p>
-		  </div>
+						<div class="thumbnail" >
+							<img class="thumb-img" ng-src="{{t.album.images[1].url}}" alt="album image">
+							<div class="caption">
+								<h4 title="{{t.name}}" >{{t.name | cutwords:true:25:'...'}}</h4>
+								<h5>by: <a href={{t.artists[0].external_url.spotify}} >{{t.artists[0].name}}</a></h5>
+
+								<div class="favtime">
+									<i class="material-icons">favorite</i> <p>{{t.popularity}}</p>
+									<i class="material-icons">av_timer</i> <p>{{t.duration_ms | date:'mm:ss'}}</p>
+									<a href="" title="add track"><i class="material-icons addbtn" ng-click="mm.addTrack(t.uri)">add</i></a>
+									<a href="{{t.preview_url}}" title="preview" ><i class="material-icons prevbtn">play_arrow</i></a>
+								</div>
+
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- Check if there are more results on search  -->
+				<div class="btn-block" ng-show="mm.searchResultArray[mm.searchResultArray.length-1].tracks.next!=null"><a class="btn btn-default see-more" ng-click="mm.getMoreTracks(mm.searchResultArray[mm.searchResultArray.length-1].tracks.next)">See more results</a></div>
+			</div>
+
 		</div>
 
-		<div class="cubehover acoustic col-sm-6 col-md-3">
-		  <div class="hover-show">
-		    <h1 class="stat stat-acoustic">{{mm.userStats.acousticness | number : 2 }}</h1>
-		  </div>
-		  <div class="hover-hide">
-		    <h3>[ Acousticness ]</h3>
-		    <p>From 0.0 to 1.0 of whether the track is acoustic. A higher number indicates a preference for acoustic tracks on the playlist.</p>
-		  </div>
-		</div>
-		
-		<div class="cubehover valence col-sm-6 col-md-3">
-		  <div class="hover-show">
-		    <h1 class="stat stat-valence">{{mm.userStats.valence | number : 2}}</h1>
-		  </div>
-		  <div class="hover-hide">
-		    <h3>[ Valence ]</h3>
-		    <p>A measure for describing the musical positiveness conveyed by a track. High valence sound more positive while low valence sound more negative.</p>
-		  </div>
-		</div>
-	      </div>
-	    </div>
-	    
-	    <div class="row">
-	      <div class="center-row">
-		<div class="cubehover live col-sm-6 col-md-3">
-		  <div class="hover-show">
-		    <h1 class="stat stat-live">{{mm.userStats.liveness | number : 2}}</h1>
-		  </div>
-		  <div class="hover-hide">
-		    <h3>[ Liveness ]</h3>
-		    <p>Detects the presence of an audience in the recording.</p>
-		  </div>
+		<!--  User information -->
+		<div ng-show="mm.selected(1)">
+			<h2 class="text-center">{{mm.name}} you contributed with {{mm.userStats.song_number>0 ? mm.userStats.song_number : 0  }} awesome songs </h2>
+			<div>
+				<div class="row">
+					<div class="center-row">
+
+						<div class="cubehover dance col-sm-6 col-md-3">
+							<div class="hover-show">
+								<h1 class="stat stat-dance">{{mm.userStats.danceability | number : 2}}</h1>
+							</div>
+							<div class="hover-hide">
+								<h3>[ Danceability ]</h3>
+								<p>How suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity.</p>
+							</div>
+						</div>
+
+						<div class="cubehover energy col-sm-6 col-md-3">
+							<div class="hover-show">
+								<h1 class="stat stat-energy">{{mm.userStats.energy | number : 2}}</h1>
+							</div>
+							<div class="hover-hide">
+								<h3>[ Energy ]</h3>
+								<p>Energy is a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. Typically, energetic tracks feel fast, loud, and noisy.</p>
+							</div>
+						</div>
+
+						<div class="cubehover acoustic col-sm-6 col-md-3">
+							<div class="hover-show">
+								<h1 class="stat stat-acoustic">{{mm.userStats.acousticness | number : 2 }}</h1>
+							</div>
+							<div class="hover-hide">
+								<h3>[ Acousticness ]</h3>
+								<p>From 0.0 to 1.0 of whether the track is acoustic. A higher number indicates a preference for acoustic tracks on the playlist.</p>
+							</div>
+						</div>
+
+						<div class="cubehover valence col-sm-6 col-md-3">
+							<div class="hover-show">
+								<h1 class="stat stat-valence">{{mm.userStats.valence | number : 2}}</h1>
+							</div>
+							<div class="hover-hide">
+								<h3>[ Valence ]</h3>
+								<p>A measure for describing the musical positiveness conveyed by a track. High valence sound more positive while low valence sound more negative.</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="center-row">
+						<div class="cubehover live col-sm-6 col-md-3">
+							<div class="hover-show">
+								<h1 class="stat stat-live">{{mm.userStats.liveness | number : 2}}</h1>
+							</div>
+							<div class="hover-hide">
+								<h3>[ Liveness ]</h3>
+								<p>Detects the presence of an audience in the recording.</p>
+							</div>
+						</div>
+
+						<div class="cubehover loud col-sm-6 col-md-3">
+							<div class="hover-show">
+								<h1 class="stat stat-loud">{{mm.userStats.loudness | number : 2}}</h1>
+							</div>
+							<div class="hover-hide">
+								<h3>[ Loudness ]</h3>
+								<p>The overall loudness of a track in decibels (dB). Loudness is the quality of a sound that is the primary psychological correlate of physical strength (amplitude).</p>
+							</div>
+						</div>
+
+						<div class="cubehover speech col-sm-6 col-md-3">
+							<div class="hover-show">
+								<h1 class="stat stat-speech">{{mm.userStats.speechiness | number : 2}}</h1>
+							</div>
+							<div class="hover-hide">
+								<h3>[ Speechiness ]</h3>
+								<p>Speechiness detects the presence of spoken words in a track. The more exclusively speech-like the recording, the closer to 1.0 the attribute value.</p>
+							</div>
+						</div>
+
+						<div class="cubehover duration col-sm-6 col-md-3">
+							<div class="hover-show">
+								<h1 class="stat stat-duration">{{mm.userStats.duration_ms | mstotime }}</h1>
+							</div>
+							<div class="hover-hide">
+								<h3>[ Duration ]</h3>
+								<p>The sum of total duration of the tracks</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 
-		<div class="cubehover loud col-sm-6 col-md-3">
-		  <div class="hover-show">
-		    <h1 class="stat stat-loud">{{mm.userStats.loudness | number : 2}}</h1>
-		  </div>
-		  <div class="hover-hide">
-		    <h3>[ Loudness ]</h3>
-		    <p>The overall loudness of a track in decibels (dB). Loudness is the quality of a sound that is the primary psychological correlate of physical strength (amplitude).</p>
-		  </div>
-		</div>
+		<!-- Tracks available on the playlist -->
+		<div ng-show="mm.selected(2)">
+			<div ng-repeat="track in mm.playlistTracksArray">
+				<div class="col-sm-6 col-md-4" ng-repeat="pt in track.items" >
+					<div class="thumbnail">
+						<img class="thumb-small" ng-src="{{pt.track.album.images[2].url}}" alt="album image" />
+						<div class="caption caption-nomargin">
+							<h4 data-toggle="tooltip" title="{{pt.track.name}}" >{{pt.track.name | cutwords:true:20:'...'}}</h4>
+							<h5>by: <a href={{pt.track.artists[0].external_url.spotify}} >{{pt.track.artists[0].name |cutwords:true:25:'...'}}</a></h5>
 
-		<div class="cubehover speech col-sm-6 col-md-3">
-		  <div class="hover-show">
-		    <h1 class="stat stat-speech">{{mm.userStats.speechiness | number : 2}}</h1>
-		  </div>
-		  <div class="hover-hide">
-		    <h3>[ Speechiness ]</h3>
-		    <p>Speechiness detects the presence of spoken words in a track. The more exclusively speech-like the recording, the closer to 1.0 the attribute value.</p>
-		  </div>
-		</div>
-
-		<div class="cubehover duration col-sm-6 col-md-3">
-		  <div class="hover-show">
-		    <h1 class="stat stat-duration">{{mm.userStats.duration_ms | mstotime }}</h1>
-		  </div>
-		  <div class="hover-hide">
-		    <h3>[ Duration ]</h3>
-		    <p>The sum of total duration of the tracks</p>
-		  </div>
-		</div>
-	      </div>
-	    </div>
-	  </div>
-	</div>
-
-	<!-- Tracks available on the playlist -->
-	<div ng-show="mm.selected(2)">
-	  <div ng-repeat="track in mm.playlistTracksArray">
-	    <div class="col-sm-6 col-md-4" ng-repeat="pt in track.items" >
-	      <div class="thumbnail">
-		<img class="thumb-small" ng-src="{{pt.track.album.images[2].url}}" alt="album image" />
-		<div class="caption caption-nomargin">
-		  <h4 data-toggle="tooltip" title="{{t.name}}" >{{pt.track.name | cutwords:true:25:'...'}}</h4>
-		  <h5>by: <a href={{pt.track.artists[0].external_url.spotify}} >{{pt.track.artists[0].name}}</a></h5>
-		  <div>
+							<div>
 		    <span>
 		      <i class="material-icons fav-remove" ng-show="mm.getLove(pt.track.uri)" ng-click="mm.setLove(pt.track.uri)">favorite</i>
 		      <i class="material-icons fav" ng-hide="mm.getLove(pt.track.uri)" ng-click="mm.setLove(pt.track.uri)">favorite_border</i>
@@ -209,26 +213,58 @@
 		      <i class="material-icons del-remove" ng-show="mm.getHate(pt.track.uri)" ng-click="mm.setHate(pt.track.uri)">remove_circle</i>
 		      <i class="material-icons del" ng-hide="mm.getHate(pt.track.uri)" ng-click="mm.setHate(pt.track.uri)" >remove_circle_outline</i>
 		    </span>
-		  </div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="btn-block" ng-show="mm.playlistTracksArray[mm.playlistTracksArray.length-1].tracks.next!=null">
+					<a class="btn btn-default see-more" ng-click="mm.getMorePlaylistTracks(mm.playlistTracksArray[mm.playlistTracksArray.length-1].tracks.next)">more tracks</a>
+				</div>
+			</div>
 		</div>
-	      </div>
-	    </div>
-	    <div class="btn-block" ng-show="mm.playlistTracksArray[mm.playlistTracksArray.length-1].tracks.next!=null">
-	      <a class="btn btn-default see-more" ng-click="mm.getMorePlaylistTracks(mm.playlistTracksArray[mm.playlistTracksArray.length-1].tracks.next)">more tracks</a>
-	    </div>   
-	  </div>
+
+		<!-- Statistics of the playlist-->
+		<div ng-show="mm.selected(3)">
+			<div class="row">
+				<div class="center-row">
+					<h1 class="text-center"data-toggle="tooltip" title="Hooray!" >information regarding the music playlist</h1>
+					<img ng-src="images/inprogress.png" />
+				</div>
+			</div>
+		</div>
+
+		<!-- Administrator pannel -->
+		<div ng-show="mm.selected(4)">
+				<a href="rest/login">Log in</a>
+				<div class="panel panel-default">
+					<div class="panel-heading">List of users</div>
+					<table class="table">
+						<title>User List</title>
+						<tr>
+							<th>Name</th>
+							<th>IP</th>
+							<th>Actions</th>
+						</tr>
+
+						<tr ng-repeat="user in mm.admin_user_list">
+							<td>{{user.user_name}}</td>
+							<td>{{user.user}}</td>
+							<td>
+								<a href="" ng-click="mm.adminRemoveUser(user.user,user.user_name)">remove</a>
+							</td>
+						</tr>
+
+						<tr>
+							<td><input type="text" placeholder="user display name" ng-model="mm.admin_new_user_name" ></td>
+							<td><input type="text" placeholder="user machine ip" ng-model="mm.admin_new_user_ip" ></td>
+							<td><a href="" ng-click="mm.adminAddUser()">add</a></td>
+						</tr>
+
+
+					</table>
+				</div>
+		</div>
 	</div>
-	
-	<!-- Statistics of the playlist-->
-	<div ng-show="mm.selected(3)">
-	  <div class="row">
-	  <div class="center-row">
-	    <h1 class="text-center"data-toggle="tooltip" title="Hooray!" >information regarding the music playlist</h1>
-	    <img ng-src="images/inprogress.png" />       
-	  </div>
-	  </div>
-	</div>
-      </div>
-    </div>
-  </body>
+</div>
+</body>
 </html>
