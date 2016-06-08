@@ -29,21 +29,6 @@
 		<div class="page-header">
 			<h1>My music is better than yours <small>FUNdão edition</small></h1>
 		</div>
-
-		<!--
-            <div>
-              <div class="input-group input-group-lg">
-            <span class="input-group-addon" id="sizing-addon1">@</span>
-            <input type="text" class="form-control"
-                   placeholder="Today i am feeling ... "
-                   aria-describedby="sizing-addon1"
-                   ng-model="mm.feels">
-            <span class="input-group-btn">
-              <button class="btn btn-default" type="button" ng-click="mm.go()">Post</button>
-            </span>
-              </div>
-            </div>
-            -->
 	</div>
 
 	<div class="container">
@@ -235,36 +220,37 @@
 
 		<!-- Administrator pannel -->
 		<div ng-show="mm.selected(4)">
-				<a href="rest/login">Log in</a>
-				<div class="panel panel-default">
-					<div class="panel-heading">List of users</div>
-					<table class="table">
-						<title>User List</title>
-						<tr>
-							<th>Name</th>
-							<th>IP</th>
-							<th>Actions</th>
-						</tr>
+			<a href="rest/login">Log in</a>
+			<div class="panel panel-default">
+				<div class="panel-heading">List of users</div>
+				<table class="table">
+					<title>User List</title>
+					<tr>
+						<th>Name</th>
+						<th>IP</th>
+						<th>Actions</th>
+					</tr>
 
-						<tr ng-repeat="user in mm.admin_user_list">
-							<td>{{user.user_name}}</td>
-							<td>{{user.user}}</td>
-							<td>
-								<a href="" ng-click="mm.adminRemoveUser(user.user,user.user_name)">remove</a>
-							</td>
-						</tr>
+					<tr ng-repeat="user in mm.admin_user_list">
+						<td>{{user.user_name}}</td>
+						<td>{{user.user}}</td>
+						<td>
+							<a href="" ng-click="mm.adminRemoveUser(user.user,user.user_name)">remove</a>
+						</td>
+					</tr>
 
-						<tr>
-							<td><input type="text" placeholder="user display name" ng-model="mm.admin_new_user_name" ></td>
-							<td><input type="text" placeholder="user machine ip" ng-model="mm.admin_new_user_ip" ></td>
-							<td><a href="" ng-click="mm.adminAddUser()">add</a></td>
-						</tr>
-
-
-					</table>
-				</div>
+					<tr>
+						<td><input type="text" placeholder="user display name" ng-model="mm.admin_new_user_name" ></td>
+						<td><input type="text" placeholder="user machine ip" ng-model="mm.admin_new_user_ip" ></td>
+						<td><a href="" ng-click="mm.adminAddUser()">add</a></td>
+					</tr>
+				</table>
+			</div>
 		</div>
 	</div>
+	<footer><div class="well well-sm">Fork this project ==> <a href="https://github.com/megawario/mmibty">here</a> and change it yourself :)</div></footer>
 </div>
+
+
 </body>
 </html>

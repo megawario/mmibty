@@ -1,6 +1,9 @@
 @import url("bootstrap.min.css");
 @import url("stat.css");
 
+footer {
+    margin:5px;
+}
 
 .favtime {
 	 display:inline-flex;	
