@@ -105,7 +105,7 @@ angular.module('mmibty.services',[])
 
 	//add tracks to playlist
 	result.addTrack = function(payload){
-	    var my_url = "rest/playlist/track/add";
+	    var my_url = "rest/playlist/track/addtest"; //TODO change to add once addtest is done
 	    return $http({
 		method: 'POST',
 		url: my_url,

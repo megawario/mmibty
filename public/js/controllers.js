@@ -92,10 +92,14 @@ angular.module('mmibty.controllers',
 				(function(response){
 					if(response.status==200){
 						this.getPlaylistTracks(); //refresh playlist
-						this.getUserStatus(); //refresh user stats
-						//TODO do something with the response if needed.
+						this.getUserStatus();     //refresh user stats
+						//TODO do something with the response if needed ie show window saying it went well.
 					}
-					else{alert("problem occured when adding music");}
+				}).bind(this),
+				(function(response){
+					mmibtyBootbox.show(mmibtyBootbox.dialogType.alert,
+						'Error Adding',
+						response.data.error+" \n "+response.data.message);
 				}).bind(this)
 			)};
 

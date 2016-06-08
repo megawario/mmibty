@@ -30,8 +30,8 @@ angular.module('mmibty.bootbox',[])
                         }
                     };
                     break;
-                case dialogType.alert:
-                default:
+                //case dialogType.alert:
+                default: //alert
                     options.buttons = {
                         main: {
                             label: "OK",
