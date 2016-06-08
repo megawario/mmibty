@@ -60,7 +60,7 @@ module.exports = function(express,config,utils,database){
     router.get('/playlist/',function(req,res){
 	db.getAccessToken(function(err,access_token){
 	    if(err){
-		res.sendStatus(500);
+			res.sendStatus(500);
 	    }else{
 		var authHeader= {
 		    url: "https://api.spotify.com/v1/users/"+config.spot.userid+"/playlists/"+config.spot.playlist+"/tracks",
@@ -68,12 +68,13 @@ module.exports = function(express,config,utils,database){
 		    json: true
 		};
 		var request = new require("request");
-		request.get(authHeader,function(error, response, body){
+		request.get(authHeader,function(err, response, body){
 		    //TODO modify the request to send info about song preference here
-
-
-		    res.json(body);
-
+			if(err || typeof body.error === undefined){ //error if service down
+				res.sendStatus(500);
+			}else{
+		    	res.status(200).json(body);
+			}
 		});
 	    }
 	});

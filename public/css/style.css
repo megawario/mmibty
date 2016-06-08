@@ -1,8 +1,16 @@
 @import url("bootstrap.min.css");
 @import url("stat.css");
+@import url("spinner.css");
 
 footer {
     margin:5px;
+    text-align:center;
+
+}
+
+footer i{
+    display:inline-flex;
+    vertical-align:middle;
 }
 
 .favtime {

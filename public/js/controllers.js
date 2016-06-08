@@ -6,7 +6,7 @@ angular.module('mmibty.controllers',
 
 		//witch tab is selected
 		this.selectedTab=0;
-		
+
 		//selects witch tab
 		this.selected = function(index){
 			return this.selectedTab===index;
@@ -80,6 +80,10 @@ angular.module('mmibty.controllers',
 		//===== Search functionality =====//
 		this.searchInput="";
 		this.searchResultArray=[];
+		this.search_load=false;
+
+		this.search_failed=false;
+		this.search_failed_msg="";
 
 		//add track
 		this.addTrack = function(track){
@@ -97,60 +101,107 @@ angular.module('mmibty.controllers',
 
 		//searches for song music use this.search to find it
 		this.searchTrack = function(){
+			this.search_failed=false;
 			this.searchResultArray=[];
-			if(typeof this.searchInput == undefined || this.searchInput == "") return;
+			if(typeof this.searchInput == undefined || this.searchInput == ""){
+				this.search_failed=true;
+				return;
+			}
+			this.search_load=true;
 			var search = this.searchInput.replace(" ","+");
 			mmibtyAPI.searchTrack(search)
 				.then(
-					(function(response){
-						this.searchResultArray.push(response.data);
-					}).bind(this),function(response){alert("error occured while searching")});
-		};
-
-		//addes keypress to the search bar
-		this.keypressSearch = function(keyEvent){
-			if(keyEvent.which == 13) this.searchTrack();
+					(function(response){ //on success
+						if(response.data=="" || typeof response.data==undefined || response.data.tracks.total==0) {
+							this.search_failed=true;
+							this.search_failed_msg="No search results found for "+this.searchInput;
+						}else {
+							this.searchResultArray.push(response.data);
+						}
+						this.search_load=false;
+					}).bind(this),
+					(function(response){ //on fail fetch
+						this.search_failed=true;
+						this.search_failed_msg="Could not fetch info from server";
+						this.search_load=false;
+					}).bind(this));
 		};
 
 		//fetch the rest of the tracks from the search, pushing the rest to the search array.
 		this.getMoreTracks = function(nextUrl){
+			this.search_load=true;
 			mmibtyAPI.getURL(nextUrl)
 				.then(
 					(function(response){
 						this.searchResultArray.push(response.data);
-					}).bind(this),function(response){alert("error occured while searching")});
+						this.search_load=false;
+					}).bind(this),
+					(function(response){
+						this.search_failed=true;
+						this.search_failed_msg="Failed fetching the rest server info :(";
+						this.search_load=false;
+					}).bind(this));
 		};
+
+		//adds keypress to the search bar
+		this.keypressSearch = function(keyEvent){
+			if(keyEvent.which == 13) this.searchTrack();
+		};
+
+		
 
 		// =========== Playlist =========== //
 
 		//model for the playlist tracks
 		this.playlistTracksArray=[];
-
+		
+		//errors for playlist screen "our music"
+		this.playlist_failure=false;
+		this.playlist_failure_msg="";
+		this.playlist_loading=false;
+		
 		//fetch and append the playlistTracks
 		this.getPlaylistTracks = function(){
+			this.playlist_failure=false;
+			this.playlist_loading=true;
 			this.playlistTracksArray=[];
+
 			mmibtyAPI.getPlaylistTracks().then(
 				(function(response){
 					this.playlistTracksArray.push(response.data);
-				}).bind(this),function(response){alert("error occured while loading")}
+					this.playlist_loading=false;
+				}).bind(this),
+				(function(response){
+					this.playlist_failure=true;
+					this.playlist_failure_msg="Error while loading playlist from server!! Mário probably forgot to add the refresh token... bastard";
+					this.playlist_loading=false;
+				}).bind(this)
 			);
 		};
 
 		//fetch and append the rest of the playlist tracks
 		this.getMorePlaylistTracks = function(nextUrl){
+			this.playlist_failure=false;
+			this.playlist_loading=true;
 			mmibtyAPI.getURL(nextUrl)
 				.then(
 					(function(response){
 						this.playlistTracksArray.push(response.data);
-					}).bind(this),function(response){alert("error occured while searching")});
+						this.playlist_loading=false;
+					}).bind(this),
+					(function(response){
+						this.playlist_failure=true;
+						this.playlist_failure_msg="Error while fetching more infro from server :(";
+						this.playlist_loading=false;
+					}).bind(this));
 		}
 
 
-		// ========== STATS ========== //
+		// ========== USER STATS ========== //
 		this.name="";//name for the page
 		this.userStats={};
 
-		//fetch user musical stats
+		//fetch user musical stats and owned songs
 		this.getUserStatus = function(){
 			mmibtyAPI.getUserStats().then(
 				(function(response){
