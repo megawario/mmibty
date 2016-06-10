@@ -90,7 +90,7 @@ angular.module('mmibty.controllers',
 			var payload = {track_uri:track}
 			mmibtyAPI.addTrack(payload).then(
 				(function(response){
-					if(response.status==200){
+					if(response.status==201){ //track created
 						this.getPlaylistTracks(); //refresh playlist
 						this.getUserStatus();     //refresh user stats
 						//TODO do something with the response if needed ie show window saying it went well.
@@ -173,7 +173,6 @@ angular.module('mmibty.controllers',
 			mmibtyAPI.getPlaylistTracks().then(
 				(function(response){
 					this.playlistTracksArray.push(response.data);
-					alert(JSON.stringify(this.playlistTracksArray));
 					this.playlist_loading=false;
 				}).bind(this),
 				(function(response){

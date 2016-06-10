@@ -39,21 +39,13 @@ angular.module('mmibty.services',[])
 		
 	//check if user is admin
 	result.isAdmin = function(){
-	    var my_url = "rest/user/admin/";
+	    var my_url = "admin/isadmin";
 	    return $http({
 		method: 'GET',
 		url: my_url
 	    });
 	};
-
-	result.login = function(){
-	    var my_url = "rest/login";
-	    return $http({
-		method: 'GET',
-		url: my_url
-	    });
-	}
-
+		
 	//get user name associated with machine
 	result.getName = function(){
 	    var my_url = "rest/user/name/";
@@ -91,7 +83,7 @@ angular.module('mmibty.services',[])
 		url: my_url
 	    });
 	};
-		
+
 	//get playlist tracks
 	result.getPlaylistTracks = function(){
 	    var my_url = "rest/playlist/";

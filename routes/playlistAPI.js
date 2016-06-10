@@ -15,13 +15,13 @@ module.exports = function (express, config, utils, db) {
     //allways authorize remote address & user access
     router.use(function (req, res, next) {
         var remote = ipv4(req.connection.remoteAddress);
-        log.debug("Checking auth for " + remote + "with config.auth: " + config.auth[remote]);
-        if (config.auth[remote] === "undefined") {
-            res.sendStatus(403); //TODO redirect to forbidden page
-        } else {
-            //TODO check if user exists - returns 403 if not.
+        log.debug("Access from: " + remote);
+        adminCheckUserAuth(remote,function(err,doc){
+            if(err) return res.sendStatus(403);
+            req.user_name = doc.user_name;
+            log.debug("authenticated as " + remote + " with name: " + req.user_name);
             next();
-        }
+        });
     });
 
     router.use(bodyParser.json());
@@ -40,17 +40,10 @@ module.exports = function (express, config, utils, db) {
     //get name associated with the machine
     router.get('/user/name/', function (req, res) {
         var remote = ipv4(req.connection.remoteAddress);
-        if (remote !== "undefined") res.json({name: config.auth[remote]});
+        if (remote !== "undefined") res.json({name: req.user_name});
         else res.sendStatus(500); //server Error
     });
-
-    //checks if user is admin
-    router.get('/user/admin/', function (req, res) {
-        var remote = ipv4(req.connection.remoteAddress);
-        if (remote !== "undefined" && remote === config.master) res.sendStatus(200); //OK
-        else res.sendStatus(403); //not auth
-    });
-
+    
     // =============================================================================== PLAYLIST ============================================================= //
 
     router.get('/playlist/status', function (req, res) {
@@ -88,15 +81,17 @@ module.exports = function (express, config, utils, db) {
         log.debug("track to add: " + req.body.track_uri + " by user: " + req.connection.remoteAddress);
         var track_uri = req.body.track_uri;
         var user = ipv4(req.connection.remoteAddress);
-        var user_name = config.auth[user];
+        var user_name = req.user_name;
         //1 - check on db if exists
         db.trackExists(null, track_uri, function (err) {
                 if (err) return res.status(500).json({error: "Cannot add existing track - it allready exists"});
                 else {
-                    this.spotAddTrack(err, track_uri, function (err) {      				//2 - add to playlist
+                    this.spotAddTrack(err, track_uri, function (err) {      				    //2 - add to playlist
                             this.spotGetTrackInfo(err, track_uri, function (err, jsonData) {	//3 - get track info
-                                    jsonData.user = user;
-                                    jsonData.user_name = user_name;
+                                    if(typeof jsonData!="undefined"){
+                                        jsonData.user = user;
+                                        jsonData.user_name = user_name;
+                                    }
                                     db.addTrack(err, jsonData, function (err) { 					//4 - add track info
                                         if (err) {
                                             //5 - remove track from playlist - clean error to allow removing the track
@@ -230,88 +225,7 @@ module.exports = function (express, config, utils, db) {
 
 
 // ===================================== AUTH ================================================================= //
-    var querystring = require("querystring");
-
-    router.get('/login', function (req, res) {
-        //check if admin:
-        var remote = ipv4(req.connection.remoteAddress);
-        if (remote !== "undefined" && remote === config.master) {
-            var state = utils.randomString(16);
-            res.cookie('spotify_auth_state', state);
-
-            // your application requests authorization
-            res.redirect('https://accounts.spotify.com/authorize?' +
-                querystring.stringify({
-                    response_type: 'code',
-                    client_id: config.spot.clientID,
-                    scope: config.spot.scope,
-                    redirect_uri: config.spot.redirectURI,
-                    state: state
-                }));
-        } else {
-            log.debug("Could not login - not admin");
-        }
-    });
-
-    //callback of auth
-    router.get('/callback', function (req, res) {
-        console.log("calling callback");
-
-        // your application requests refresh and access tokens
-        // after checking the state parameter
-        var code = req.query.code || null;
-        var state = req.query.state || null;
-        console.log("my code is: " + code);
-        //var storedState = req.cookies ? req.cookies[stateKey] : null;
-        console.log("my state is: " + state);
-        //TODO bypass the stored state for now
-        if (false) {//state === null || state !== storedState) {
-            //state mismatch
-            res.sendStatus(500); //TODO redirect to a safe page
-        } else {
-            //fetch token with auth code;
-
-            //res.clearCookie(stateKey);
-            //create auth option json
-            var authOptions = {
-                url: 'https://accounts.spotify.com/api/token',
-                form: {
-                    code: code,
-                    redirect_uri: config.spot.redirectURI,
-                    grant_type: 'authorization_code'
-                },
-                headers: {
-                    'Authorization': 'Basic ' + (new Buffer(config.spot.clientID + ':' + config.spot.clientSecret).toString('base64'))
-                },
-                json: true
-            };
-
-            //send request for secret token for spotify
-            request.post(authOptions, function (error, response, body) {
-                if (!error && response.statusCode === 200) {
-
-                    var access_token = body.access_token;
-                    var refresh_token = body.refresh_token;
-
-                    var options = {
-                        url: 'https://api.spotify.com/v1/me',
-                        headers: {'Authorization': 'Bearer ' + access_token},
-                        json: true
-                    };
-                    console.log("My access token is: " + access_token);
-                    console.log("My refresh token is: " + refresh_token);
-
-                    //store tokens in database
-                    db.storeAccessToken({"access_token": access_token});
-                    db.storeRefreshToken({"refresh_token": refresh_token});
-                    res.redirect(200, config.server.path);
-
-                } else { //INVALID redirect
-                    res.sendStatus(500);
-                }
-            });
-        }
-    });
+    
 
     return router;
 }

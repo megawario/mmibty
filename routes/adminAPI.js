@@ -21,10 +21,10 @@ module.exports = function(express,config,utils,database){
     //allways check if authorized
     router.use(function(req,res,next){
         var remote = ipv4(req.connection.remoteAddress);
-        log.debug("Checking auth for "+remote +" with config.auth: "+config.auth[remote]);
         if(config.master != remote){
-            res.sendStatus(403); //TODO redirect to forbidden page
+            res.sendStatus(403); //TODO redirect to forbidden page not admin
         }else{
+            log.warning("Admin access authorized for "+remote);
             next();
         }
     });
@@ -61,6 +61,97 @@ module.exports = function(express,config,utils,database){
             else {
                 res.status(200).json(docs);}
         });
+    });
+
+    //checks if user is admin
+    router.get('/isadmin/', function (req, res) {
+        var remote = ipv4(req.connection.remoteAddress);
+        if (remote !== "undefined" && remote === config.master) res.sendStatus(200); //OK
+        else res.sendStatus(403); //not auth
+    });
+
+    // =============== AUTH ==========//
+    var querystring = require("querystring");
+
+    router.get('/login', function (req, res) {
+        //check if admin:
+        var remote = ipv4(req.connection.remoteAddress);
+        if (remote !== "undefined" && remote === config.master) {
+            var state = utils.randomString(16);
+            res.cookie('spotify_auth_state', state);
+
+            // your application requests authorization
+            res.redirect('https://accounts.spotify.com/authorize?' +
+                querystring.stringify({
+                    response_type: 'code',
+                    client_id: config.spot.clientID,
+                    scope: config.spot.scope,
+                    redirect_uri: config.spot.redirectURI,
+                    state: state
+                }));
+        } else {
+            log.debug("Could not login - not admin");
+        }
+    });
+
+    //callback of auth
+    router.get('/callback', function (req, res) {
+        console.log("calling callback");
+
+        // your application requests refresh and access tokens
+        // after checking the state parameter
+        var code = req.query.code || null;
+        var state = req.query.state || null;
+        console.log("my code is: " + code);
+        //var storedState = req.cookies ? req.cookies[stateKey] : null;
+        console.log("my state is: " + state);
+        //TODO bypass the stored state for now
+        if (false) {//state === null || state !== storedState) {
+            //state mismatch
+            res.sendStatus(500); //TODO redirect to a safe page
+        } else {
+            //fetch token with auth code;
+
+            //res.clearCookie(stateKey);
+            //create auth option json
+            var authOptions = {
+                url: 'https://accounts.spotify.com/api/token',
+                form: {
+                    code: code,
+                    redirect_uri: config.spot.redirectURI,
+                    grant_type: 'authorization_code'
+                },
+                headers: {
+                    'Authorization': 'Basic ' + (new Buffer(config.spot.clientID + ':' + config.spot.clientSecret).toString('base64'))
+                },
+                json: true
+            };
+
+            //send request for secret token for spotify
+            request.post(authOptions, function (error, response, body) {
+                if (!error && response.statusCode === 200) {
+
+                    var access_token = body.access_token;
+                    var refresh_token = body.refresh_token;
+
+                    var options = {
+                        url: 'https://api.spotify.com/v1/me',
+                        headers: {'Authorization': 'Bearer ' + access_token},
+                        json: true
+                    };
+                    console.log("My access token is: " + access_token);
+                    console.log("My refresh token is: " + refresh_token);
+
+                    //store tokens in database
+                    db.storeAccessToken({"access_token": access_token});
+                    db.storeRefreshToken({"refresh_token": refresh_token});
+                    res.redirect(200, config.server.path);
+
+                } else { //INVALID redirect
+                    res.sendStatus(500);
+                }
+            });
+        }
     });
     
     return router;

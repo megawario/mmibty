@@ -116,6 +116,7 @@ footer i{
 }
 
 .thumb-small{
+    text-align:center;
     float:left;
     margin:20px !important;
 }

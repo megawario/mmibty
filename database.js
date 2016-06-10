@@ -120,6 +120,7 @@ module.exports = function Database(connectionString){
 	 *
 	 * 1 - form the database json
 	 * 2 - store it in the database
+	 * 3 - calculate user new music stats
 	 * @param error error to propagate
 	 * @param dataJson all data required to add the song correctly
      */
@@ -142,6 +143,7 @@ module.exports = function Database(connectionString){
 			album: info.album.name,
 			name: info.name,
 			singer: info.artists[0].name,
+			singer_url: info.artists[0].external_urls.spotify,
 			danceability : feat.danceability,
 			energy : feat.energy,
 			key : feat.key,
@@ -162,11 +164,12 @@ module.exports = function Database(connectionString){
 
 		// 2 - send to the database
 		this.track.create(result, function (err) {
-			console.log(err);
 			if(err) return callback("Could not add the required track to database");
-			return callback(err);
+			addUserStats(err,result.user,result.user_name,result,function(err){
+				if(err) return callback("Could not add the required track to database");
+				return callback(err);
+			});
 		})
-
 	};
 
 	this.getTrackInfo = function(userID,callback){
@@ -176,7 +179,14 @@ module.exports = function Database(connectionString){
 		});
 	};
 
-	this.addTrackInfo = function(userID,userName,jsonData){
+	/**
+	 * Updates/Creates new user status on the database for the newly user added track
+	 * @param userID
+	 * @param userName
+	 * @param jsonData
+     */
+	this.addUserStats = function(err,userID,userName,jsonData,callback){
+		if(err) return callback(err);
 		this.user.findOneAndUpdate({ user:userID, user_name:userName},{},
 			{upsert:true, new:true},
 			function(err,doc){
@@ -187,23 +197,25 @@ module.exports = function Database(connectionString){
 					//compile information
 					var prev_percent = doc.song_number/(doc.song_number+1);
 					doc.song_number += 1;
-					doc.danceability = doc.danceability * prev_percent + jsonData.danceability/doc.song_number;
-					doc.energy = doc.energy * prev_percent + jsonData.energy/doc.song_number;
-					doc.loudness = doc.loudness * prev_percent + jsonData.loudness/doc.song_number;
-					doc.speechiness = doc.speechiness * prev_percent + jsonData.speechiness/doc.song_number;
-					doc.acousticness = doc.acousticness * prev_percent + jsonData.acousticness/doc.song_number;
-					doc.instrumentalness = doc.instrumentalness * prev_percent + jsonData.instrumentalness/doc.song_number;
-					doc.liveness = doc.liveness * prev_percent + jsonData.liveness/doc.song_number;
-					doc.valence = doc.valence * prev_percent + jsonData.valence/doc.song_number;
-					doc.duration_ms += jsonData.duration_ms;
+					doc.danceability = doc.danceability * prev_percent + jsonData.stats.danceability/doc.song_number;
+					doc.energy = doc.energy * prev_percent + jsonData.stats.energy/doc.song_number;
+					doc.loudness = doc.loudness * prev_percent + jsonData.stats.loudness/doc.song_number;
+					doc.speechiness = doc.speechiness * prev_percent + jsonData.stats.speechiness/doc.song_number;
+					doc.acousticness = doc.acousticness * prev_percent + jsonData.stats.acousticness/doc.song_number;
+					doc.instrumentalness = doc.instrumentalness * prev_percent + jsonData.stats.instrumentalness/doc.song_number;
+					doc.liveness = doc.liveness * prev_percent + jsonData.stats.liveness/doc.song_number;
+					doc.valence = doc.valence * prev_percent + jsonData.stats.valence/doc.song_number;
+					doc.duration_ms += jsonData.stats.duration_ms;
 					doc.save(function(err){
-						if(err) log.err(err);
-						else console.log("added with success");
+						callback(err);
 					});
 				}
 			});
-	};
 
+
+	}
+
+	
 	// ================================ Admin Ops =============================== //
 
 	//adds new user to database
@@ -225,12 +237,21 @@ module.exports = function Database(connectionString){
 		})
 	};
 
+	//fetches all users available
 	this.adminGetUsers = function(callback){
 		this.user.find({},'user user_name',function(err,docs){
 			return callback(err,docs);
 			if(err) return callback(err);
 			else return callback(err,doc)
 		})
+	};
+
+	//checks if user exist on database
+	this.adminCheckUserAuth = function(userID,callback){
+		this.user.findOne({user:userID},'user_name',function(err,doc){
+			if(doc == null) err="Not found";
+			return callback(err,doc);
+		});
 	};
 
 	// ================================ AUTH =============================== //
