@@ -91,9 +91,7 @@ angular.module('mmibty.services',[])
 		url: my_url
 	    });
 	};
-
-	
-
+		
 	//get playlist tracks
 	result.getPlaylistTracks = function(){
 	    var my_url = "rest/playlist/";
@@ -105,7 +103,7 @@ angular.module('mmibty.services',[])
 
 	//add tracks to playlist
 	result.addTrack = function(payload){
-	    var my_url = "rest/playlist/track/addtest"; //TODO change to add once addtest is done
+	    var my_url = "rest/playlist/track/add";
 	    return $http({
 		method: 'POST',
 		url: my_url,

@@ -8,7 +8,6 @@
  * Voted deleted tracks are to be blacklisted
  * User removed tracks can be added still
  */
-
 module.exports = mongoose.model("track", new mongoose.Schema(
     {
         track_uri:String, //song uri
@@ -22,12 +21,13 @@ module.exports = mongoose.model("track", new mongoose.Schema(
         hate:Array,         //list of user_name that hates
         deleted:Boolean,    //have been deleted
 
-        // == track characteristics ==//
+        // == track characteristics taken from spotify API ==//
         stats:{
-            image:String,
-            image_small:String,
+            image:{small:String,normal:String,big:String},
+            preview:String,
             name:String,
             singer:String,
+            album:String,
             danceability: {type: Number, default: 0},
             energy: {type: Number, default: 0},
             key: {type: Number, default: 0},
@@ -41,5 +41,5 @@ module.exports = mongoose.model("track", new mongoose.Schema(
             tempo: {type: Number, default: 0},
             duration_ms: {type: Number, default: 0}
         }
-
+        
     }));

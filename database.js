@@ -69,6 +69,24 @@ module.exports = function Database(connectionString){
 	//=================================================== PLAYLIST ========================================//
 
 	/**
+	 * Returns an object with the registering of the playlists.
+	 * //TODO implement offset - related to route /playlist/
+	 * @param err
+	 * @param offset number of tracks from where to read;
+	 * @param callback will receive and object containing extra info.
+     */
+	this.getPlaylistTracks = function(err,offset,callback){
+		if(err) return callback(err);
+		this.track.find({},function(err,docs){
+
+			result={tracks:docs,next:"null"}
+
+			return callback(err,result);
+		});
+
+	};
+
+	/**
 	 * Checks if the track exists on database
 	 * @param track_uri URI for the track to be found
 	 * @param callback will receive (err) if track exists
@@ -96,48 +114,67 @@ module.exports = function Database(connectionString){
 	/**
 	 * Adds track to the playlist storing all the required information.
 	 * The dataJson must contain the following fields:
+	 *  - track_features, track_info
 	 *
 	 * If does not contain a error will be passed to the callback
+	 *
+	 * 1 - form the database json
+	 * 2 - store it in the database
 	 * @param error error to propagate
 	 * @param dataJson all data required to add the song correctly
      */
-	this.addTrack= function(error,dataJson,callback){
-		if(error) return callback(error);
-		//TODO process stuffhere
-		if(err) return callback({error:"Could not add the required track"});
+	this.addTrack= function(err,dataJson,callback){
+		if(err) return callback(err);
+
+		//add features to track
+		var feat = dataJson.track_features;
+		var info = dataJson.track_info;
+
+		var result={};
+		console.log(JSON.stringify(info));
+		result.stats = {
+			image:{
+				small: info.album.images[2].url,
+				normal: info.album.images[1].url,
+				big: info.album.images[0].url
+			},
+			preview: info.preview_url,
+			album: info.album.name,
+			name: info.name,
+			singer: info.artists[0].name,
+			danceability : feat.danceability,
+			energy : feat.energy,
+			key : feat.key,
+			loudness : feat.loudness,
+			speechiness : feat.speechiness,
+			mode : feat.mode,
+			acousticness : feat.acousticness,
+			instrumentalness: feat.instrumentalness,
+			liveness : feat.liveness,
+			valence : feat.valence,
+			tempo : feat.tempo,
+			duration_ms:feat.duration_ms	
+		};
+
+		result.track_uri = info.uri;
+		result.user = dataJson.user;
+		result.user_name = dataJson.user_name;  //user_name that added song
+
+		// 2 - send to the database
+		this.track.create(result, function (err) {
+			console.log(err);
+			if(err) return callback("Could not add the required track to database");
+			return callback(err);
+		})
+
 	};
 
-	/*
-	 //set track - this adds track to the database.
-	 // if track exists it will do nothing.
-	 this.addTrack = function(json,callback){
-	 //json will contain track_id, machine_ip and user name
-	 //check if track has been added if not, add
-	 this.track.find({'track_uri':json.track_uri},
-	 (function(err,docs){
-	 console.log("my docs have: "+docs);
-	 if (!err && docs == ""){
-	 console.log("Not error and doc is not defined ie does not exist");
-	 this.track.create(json,function(err){
-	 if(err) log.err(err);
-	 callback(err);
-	 });
-	 }else{ //todo diferenciate error
-	 console.log(err);
-	 log.debug("track has allready been added!!");
-	 callback("track allready exists");
-	 }
-	 }).bind(this)
-	 );
-	 };
-	 */
 	this.getTrackInfo = function(userID,callback){
 		this.user.find({user:userID},function(err,doc){
 			if(err) callback(err);
 			else callback(null,doc[0]);
 		});
 	};
-
 
 	this.addTrackInfo = function(userID,userName,jsonData){
 		this.user.findOneAndUpdate({ user:userID, user_name:userName},{},

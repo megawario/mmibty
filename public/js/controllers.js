@@ -173,6 +173,7 @@ angular.module('mmibty.controllers',
 			mmibtyAPI.getPlaylistTracks().then(
 				(function(response){
 					this.playlistTracksArray.push(response.data);
+					alert(JSON.stringify(this.playlistTracksArray));
 					this.playlist_loading=false;
 				}).bind(this),
 				(function(response){

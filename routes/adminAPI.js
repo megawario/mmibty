@@ -39,7 +39,7 @@ module.exports = function(express,config,utils,database){
         var userID = req.body.userID;
         var userName = req.body.userName;
         db.adminAddUser(userID,userName,function(err){
-            if(err) res.send(500).json(err); //TODO fix html status code
+            if(err) res.send(500).json(err); //TODO fix http status code
             else {res.sendStatus(200);}
         });
     });
