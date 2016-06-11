@@ -43,7 +43,41 @@ module.exports = function (express, config, utils, db) {
         if (remote !== "undefined") res.json({name: req.user_name});
         else res.sendStatus(500); //server Error
     });
-    
+
+    //set user love song
+    /**
+     * Add song to user love list
+     * 1 - update song info with user love
+     * 2 - check if song must be removed according to remove algorithm
+     *
+     * This will work as toggle. If name allready exists in the love array, it will remove.
+     * Returns 200 if OK 500 if error;
+     */
+    router.put('/user/love',function(req,res){
+        console.log("PUT LOVE on "+req.body.track_uri);
+        //update song love array
+        db.trackToggleLove(null,req.body.track_uri,req.user_name,function(err){
+            if(err) return res.status(500).json({error:"Could not set/unset love"});
+            else{
+                return res.sendStatus(200);
+            };
+
+
+        });
+    });
+
+    //set user hate song
+    router.put('/user/hate',function(req,res){
+        //update song love array
+        db.trackToggleHate(null,req.body.track_uri,req.user_name,function(err){
+            if(err) return res.status(500).json({error:"Could not set/unset hate"});
+            else{
+                return res.sendStatus(200);
+            };
+
+
+        });
+    });
     // =============================================================================== PLAYLIST ============================================================= //
 
     router.get('/playlist/status', function (req, res) {
@@ -124,6 +158,36 @@ module.exports = function (express, config, utils, db) {
         )
     });
 
+    /**
+     * Remove track from playlist
+     * 1 - remove track from spotify
+     * 2 - remove track from database
+     * 3 - recalculate statistics
+     * 
+     * //TODO shouls restrict this delete to owner of the music.
+     */
+    router.delete('/playlist/track/remove',function(req,res){
+        var user = ipv4(req.connection.remoteAddress);
+        var track_uri = req.query.track_uri;
+        db.getTrack(null,track_uri,function(err,track){
+            //check if user is authorized to remove track.
+            //TODO admin can remove any track:
+            if(err || track.user!=user || typeof track=="undefined") return res.sendStatus(403);
+
+            this.spotRemoveTrack(null, track_uri, function(err){
+                db.removeTrack(err,track_uri,function(err){
+                    if(err) return res.status(500).json({error:"Could not delete track",debug:err});
+                    else {
+                        //recalculation can fail, we dont care
+                        db.recalculateUserStats(err,user,req.user_name,function(err){
+                            if(err) log.warning("failed recalculating stats "+err)});
+                        return res.sendStatus(200);
+                    }
+                });
+            })
+        });
+    });
+
 // ===================================== SPOTYFY API REQUESTS================================================== //
 
     /**
@@ -158,7 +222,7 @@ module.exports = function (express, config, utils, db) {
      * Removes track for the playlist
      * @param err
      * @param track_uri
-     * @param callback
+     * @param callback (err)
      */
     this.spotRemoveTrack = function (err, track_uri, callback) {
         if (err) return callback(err);
@@ -174,7 +238,7 @@ module.exports = function (express, config, utils, db) {
             //add info to delete on header structure
             header.body = {"tracks": [{"uri": track_uri}]};
 
-            // 2 - make post
+            // 2 - make delete
             request.delete(header, function (error, response, body) {
                 if (error || response.statusCode != 200) return callback("Could not remove track from spotify");
                 return callback(error); //is error;
@@ -223,9 +287,7 @@ module.exports = function (express, config, utils, db) {
         });
     };
 
-
 // ===================================== AUTH ================================================================= //
-    
 
     return router;
 }

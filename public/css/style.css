@@ -2,6 +2,26 @@
 @import url("stat.css");
 @import url("spinner.css");
 
+.trackMarkedIcon {
+    margin:5px;
+    float:right;
+    cursor:pointer;
+    color:darkred;
+}
+.trackMarked{
+    border-color:darkred;
+}
+
+
+.trackDelete{
+    margin:5px;
+    float:right;
+    cursor:pointer;
+}
+.trackDelete:hover{
+    color:red;
+}
+
 footer {
     margin:5px;
     text-align:center;
@@ -43,6 +63,7 @@ footer i{
 }
 
 .fav-remove{
+    cursor:pointer;
     color:green;
 }
 .fav:hover{
@@ -55,8 +76,15 @@ footer i{
 
 .del-remove{
     color:red;
+    cursor:pointer;
 }
 
+.fav{
+    cursor:pointer;
+}
+.del{
+    cursor:pointer;
+}
 .del:hover{
     color:red;
 }
@@ -110,6 +138,10 @@ footer i{
 }
 
 /* thumbnail */
+.thumb-div{
+    text-align:center;
+
+}
 .thumb-img {
     height: 250px !important;
     width:  250px !important;
@@ -120,6 +152,7 @@ footer i{
     float:left;
     margin:20px !important;
 }
+
 .caption-small{
     margin-bottom:20px;
 }

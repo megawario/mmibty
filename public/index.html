@@ -74,8 +74,8 @@
                         <div class="thumbnail">
                             <img class="thumb-img" ng-src="{{t.album.images[1].url}}" alt="album image">
                             <div class="caption">
-                                <h4 title="{{t.name}}">{{t.name | cutwords:true:25:'...'}}</h4>
-                                <h5>by: <a href={{t.artists[0].external_url.spotify}}>{{t.artists[0].name}}</a></h5>
+                                <h4 title="{{t.name}}">{{t.name | cutwords:false:20:'...'}}</h4>
+                                <h5>by: <a href={{t.artists[0].external_url.spotify}}>{{t.artists[0].name | cutwords:false:25:'...'}}</a></h5>
 
                                 <div class="favtime">
                                     <i class="material-icons">favorite</i>
@@ -218,24 +218,35 @@
 
             <div ng-repeat="page in mm.playlistTracksArray">
                 <div class="col-sm-6 col-md-4" ng-repeat="track in page.tracks">
-                    <div class="thumbnail">
-
+                    <div class="thumbnail" ng-class="{trackMarked: mm.isMarked(track) }">
+                        <i class="material-icons trackDelete" title="remove song"
+                           ng-show="track.user_name==mm.name"
+                           ng-click="mm.removeTrack(track)">delete</i>
+                        <i class="material-icons trackMarkedIcon"
+                           ng-show="mm.isMarked(track)"
+                           title="Song marked for removal">warning</i>
                         <div class="thumb-small">
                             <img  ng-src="{{track.stats.image.small}}" alt="album image"/>
-                            <div>
-		                        <i class="material-icons fav-remove" ng-show="mm.getLove(pt.track.uri)"
-                                    ng-click="mm.setLove(pt.track.uri)">favorite</i>
-		                        <i class="material-icons fav" ng-hide="mm.getLove(pt.track.uri)" ng-click="mm.setLove(pt.track.uri)">favorite_border</i>
-		                        <i class="material-icons del-remove" ng-show="mm.getHate(pt.track.uri)"
-                                    ng-click="mm.setHate(pt.track.uri)">remove_circle</i>
-		                        <i class="material-icons del" ng-hide="mm.getHate(pt.track.uri)" ng-click="mm.setHate(pt.track.uri)">remove_circle_outline</i>
+                            <div class=""title="Lovers: {{track.love}} Haters: {{track.hate}}">
+
+                                <i class="material-icons fav-remove" ng-show="track.love.indexOf(mm.name)!=-1"
+                                    ng-click="mm.setLove(track)">favorite</i>
+
+                                <i class="material-icons fav" ng-show="track.love.indexOf(mm.name)==-1"
+                                   ng-click="mm.setLove(track)">favorite_border</i>
+
+		                        <i class="material-icons del-remove" ng-show="track.hate.indexOf(mm.name)!=-1"
+                                    ng-click="mm.setHate(track)">remove_circle</i>
+
+                                <i class="material-icons del" ng-show="track.hate.indexOf(mm.name)==-1"
+                                   ng-click="mm.setHate(track)">remove_circle_outline</i>
                             </div>
                         </div>
                         <div class="caption caption-nomargin">
                             <h4 data-toggle="tooltip" title="{{track.stats.name}}">{{track.stats.name |
-                                cutwords:true:20:'...'}}</h4>
+                                cutwords:false:20:'...'}}</h4>
                             <h5>by: <a href={{track.stats.singer_url}}>{{track.stats.singer
-                                |cutwords:true:25:'...'}}</a></h5>
+                                |cutwords:false:25:'...'}}</a></h5>
                             <h6>added by: {{track.user_name}}</h6>
                         </div>
                     </div>
@@ -266,8 +277,7 @@
         <div ng-show="mm.selected(3)">
             <div class="row">
                 <div class="center-row">
-                    <h1 class="text-center" data-toggle="tooltip" title="Hooray!">information regarding the music
-                        playlist</h1>
+                    <h1 class="text-center" data-toggle="tooltip" title="Hooray!">information regarding the music playlist</h1>
                     <img ng-src="images/inprogress.png"/>
                 </div>
             </div>
@@ -275,7 +285,14 @@
 
         <!-- Administrator pannel -->
         <div ng-show="mm.selected(4)">
-            <a href="admin/login">Log in</a>
+            <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                <div class="btn-group" role="group" aria-label="Log In"><a href="admin/login">Log in</a></div>
+                <div class="btn-group" role="group" aria-label="Remove Voted" title="will remove voted tracks">
+                    <button type="button" class="btn btn-default" ng-click="mm.adminClearMarked()">Remove Voted</button>
+                </div>
+                <div class="btn-group" role="group" aria-label="Compile Stats" title="will compile playlist stats"><button type="button" class="btn btn-default">Compile Stats</button></div>
+            </div>
+
             <div class="panel panel-default">
                 <div class="panel-heading">List of users</div>
                 <table class="table">

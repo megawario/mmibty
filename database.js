@@ -74,7 +74,7 @@ module.exports = function Database(connectionString){
 	 * @param err
 	 * @param offset number of tracks from where to read;
 	 * @param callback will receive and object containing extra info.
-     */
+	 */
 	this.getPlaylistTracks = function(err,offset,callback){
 		if(err) return callback(err);
 		this.track.find({},function(err,docs){
@@ -86,6 +86,7 @@ module.exports = function Database(connectionString){
 
 	};
 
+
 	/**
 	 * Checks if the track exists on database
 	 * @param track_uri URI for the track to be found
@@ -95,13 +96,9 @@ module.exports = function Database(connectionString){
 		//check if track has been added if not, add
 		this.track.find({'track_uri':track_uri},
 			(function(err,docs){
-				if (!err && docs == ""){ //track not found pass on
+				if (!err && docs == ""){ 
 					return callback(err);
-					
-					//this.track.create(json,function(err){
-					//	if(err) log.err(err);
-					//	callback(err);
-					//});
+//TODO fix with getTrack
 				}else{ //track found
 					console.log(err);
 					log.debug("Track with uri "+track_uri+" has allready been added");
@@ -109,6 +106,79 @@ module.exports = function Database(connectionString){
 				}
 			}).bind(this)
 		);
+	};
+
+	//returns a doc with the track
+	this.getTrack = function(err,track_uri,callback){
+		this.track.find({track_uri:track_uri},function(err,doc){
+			callback(err,doc[0]);
+		});
+
+	};
+
+	this.getMarkedTracks = function(err,callback) {
+		if(err) return callback(err);
+		this.track.find({deleted: true}, callback);
+	}
+
+	/**
+	 * Toggles love for a user.
+	 * Activating Love will delete Hate.
+	 * @param err
+	 * @param track_uri track to love
+	 * @param user_name user name
+	 * @param callback is of the form (err)
+	 */
+	this.trackToggleLove = function(err,track_uri,user_name,callback){
+		if(err) return callback(err);
+		else{
+			this.track.findOne({track_uri:track_uri},function(err,doc){
+
+				console.log(JSON.stringify(doc.love));
+				if(err) return callback(err);
+				if(doc.love.indexOf(user_name)==-1){
+					doc.love.push(user_name);
+					doc.hate.remove(user_name);
+				}else{
+					doc.love.remove(user_name);
+				};
+				if(doc.hate.length-doc.love.length>=5) //TODO change hardcoded value
+					doc.deleted=true;
+				else doc.deleted=false;
+				doc.save(callback);
+				//check if must remove
+				//db.trackCheckRemove(err,track_uri)
+			});
+		};
+	};
+
+	/**
+	 * Toggles Hate for track.
+	 * Activating Hate will delete Love.
+	 * @param err
+	 * @param track_uri
+	 * @param user_name
+	 * @param callback of form (err)
+	 */
+	this.trackToggleHate = function(err,track_uri,user_name,callback){
+		if(err) return callback(err);
+		else{
+			this.track.findOne({track_uri:track_uri},function(err,doc){
+				if(err) return callback(err);
+				if(doc.hate.indexOf(user_name)==-1){
+					doc.hate.push(user_name);
+					doc.love.remove(user_name);
+				}else{
+					doc.hate.remove(user_name);
+				};
+				if(doc.hate.length-doc.love.length>=5) //TODO change hardcoded value
+					doc.deleted=true;
+				else doc.deleted=false;
+				doc.save(callback);
+				//check if must remove
+				//db.trackCheckRemove(err,track_uri)
+			});
+		};
 	};
 
 	/**
@@ -123,7 +193,7 @@ module.exports = function Database(connectionString){
 	 * 3 - calculate user new music stats
 	 * @param error error to propagate
 	 * @param dataJson all data required to add the song correctly
-     */
+	 */
 	this.addTrack= function(err,dataJson,callback){
 		if(err) return callback(err);
 
@@ -155,7 +225,7 @@ module.exports = function Database(connectionString){
 			liveness : feat.liveness,
 			valence : feat.valence,
 			tempo : feat.tempo,
-			duration_ms:feat.duration_ms	
+			duration_ms:feat.duration_ms
 		};
 
 		result.track_uri = info.uri;
@@ -172,6 +242,24 @@ module.exports = function Database(connectionString){
 		})
 	};
 
+	/**
+	 * Remove track from playlist
+	 * 1 - remove track from spotify
+	 * 2 - remove track from database
+	 * 3 - recalculate statistics
+	 * @param err
+	 * @param user_id
+	 * @param track_uri
+	 * @param callback (err)
+	 */
+	this.removeTrack = function(err,track_uri,callback){
+		if(err) return callback(err);
+		this.track.remove({track_uri:track_uri},function(err,doc){
+			if(doc.result.n==0) err= "Track allready removed";
+			return callback(err);
+		});
+	};
+
 	this.getTrackInfo = function(userID,callback){
 		this.user.find({user:userID},function(err,doc){
 			if(err) callback(err);
@@ -180,11 +268,44 @@ module.exports = function Database(connectionString){
 	};
 
 	/**
+	 * Resets user tracks stats to 0.
+	 * @param err
+	 * @param userID
+	 * @param callback
+	 * @returns {*}
+	 */
+	this.resetUserStats = function(err,userID,callback) {
+		if (err) return callback(err);
+		this.user.findOneAndUpdate({user: userID}, {}, {},
+			function (err, doc) {
+				if (err) {
+					log.err(err);
+				}
+				else {
+					doc.song_number = 0;
+					doc.danceability = 0;
+					doc.energy = 0;
+					doc.loudness = 0;
+					doc.speechiness = 0;
+					doc.acousticness = 0;
+					doc.instrumentalness = 0;
+					doc.liveness = 0;
+					doc.valence = 0;
+					doc.duration_ms = 0;
+					doc.save(function (err) {
+						callback(err);
+					});
+				}
+			});
+	};
+
+	/**
 	 * Updates/Creates new user status on the database for the newly user added track
 	 * @param userID
 	 * @param userName
+	 * @param reset If true, will reset all stat fields to default: 0
 	 * @param jsonData
-     */
+	 */
 	this.addUserStats = function(err,userID,userName,jsonData,callback){
 		if(err) return callback(err);
 		this.user.findOneAndUpdate({ user:userID, user_name:userName},{},
@@ -194,18 +315,20 @@ module.exports = function Database(connectionString){
 					log.err(err);
 					console.log(doc);
 				}else {
-					//compile information
-					var prev_percent = doc.song_number/(doc.song_number+1);
-					doc.song_number += 1;
-					doc.danceability = doc.danceability * prev_percent + jsonData.stats.danceability/doc.song_number;
-					doc.energy = doc.energy * prev_percent + jsonData.stats.energy/doc.song_number;
-					doc.loudness = doc.loudness * prev_percent + jsonData.stats.loudness/doc.song_number;
-					doc.speechiness = doc.speechiness * prev_percent + jsonData.stats.speechiness/doc.song_number;
-					doc.acousticness = doc.acousticness * prev_percent + jsonData.stats.acousticness/doc.song_number;
-					doc.instrumentalness = doc.instrumentalness * prev_percent + jsonData.stats.instrumentalness/doc.song_number;
-					doc.liveness = doc.liveness * prev_percent + jsonData.stats.liveness/doc.song_number;
-					doc.valence = doc.valence * prev_percent + jsonData.stats.valence/doc.song_number;
-					doc.duration_ms += jsonData.stats.duration_ms;
+
+						//compile information
+						var prev_percent = doc.song_number / (doc.song_number + 1);
+						doc.song_number += 1;
+						doc.danceability = doc.danceability * prev_percent + jsonData.stats.danceability / doc.song_number;
+						doc.energy = doc.energy * prev_percent + jsonData.stats.energy / doc.song_number;
+						doc.loudness = doc.loudness * prev_percent + jsonData.stats.loudness / doc.song_number;
+						doc.speechiness = doc.speechiness * prev_percent + jsonData.stats.speechiness / doc.song_number;
+						doc.acousticness = doc.acousticness * prev_percent + jsonData.stats.acousticness / doc.song_number;
+						doc.instrumentalness = doc.instrumentalness * prev_percent + jsonData.stats.instrumentalness / doc.song_number;
+						doc.liveness = doc.liveness * prev_percent + jsonData.stats.liveness / doc.song_number;
+						doc.valence = doc.valence * prev_percent + jsonData.stats.valence / doc.song_number;
+						doc.duration_ms += jsonData.stats.duration_ms;
+
 					doc.save(function(err){
 						callback(err);
 					});
@@ -213,9 +336,32 @@ module.exports = function Database(connectionString){
 			});
 
 
-	}
+	};
 
-	
+	/**
+	 * Runs through all songs, and recalculates all fields.
+	 * 1 - resets all.
+	 * 2 - run through all musics
+	 * 3 - recalculates using addUserStats
+	 * @param err
+	 * @param userID
+	 */
+	this.recalculateUserStats = function(err,userID,userName,callback){
+		if(err) return callback(err);
+		else {
+			this.resetUserStats(err, userID, function(err){
+				this.track.find({user: userID}, function (err, docs) {
+					for (var i = 0; i < docs.length; i++) {
+						addUserStats(err, userID, userName, docs[i],function (err) {
+							if (err) log.err("Failed calculating stats: ") + err;
+						});
+					}
+				});
+			});
+		}
+	};
+
+
 	// ================================ Admin Ops =============================== //
 
 	//adds new user to database
@@ -264,7 +410,7 @@ module.exports = function Database(connectionString){
 	 * @param err
 	 * @param url
 	 * @param callback has to receive (err,authHeader)
-     */
+	 */
 	this.getAuthHeader = function(err,url,callback){
 		this.getAccessToken(function(err,token){
 			var authHeader= {
@@ -273,9 +419,9 @@ module.exports = function Database(connectionString){
 				json: true
 			};
 			callback(err,authHeader);
-		});	
+		});
 	};
-	
+
 	//store refresh and auth tokens:
 	this.storeAccessToken = function(json){
 		log.debug("storing access token");

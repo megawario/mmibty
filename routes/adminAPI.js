@@ -31,6 +31,28 @@ module.exports = function(express,config,utils,database){
 
     router.use(bodyParser.json());
 
+    // ============================================================= TRACKS =================================================================================== //
+    router.delete('/cleanmarked',function(req,res){
+        var remote = ipv4(req.connection.remoteAddress);
+        var userID = config.master;
+        var track_uri = req.query.track_uri;
+
+
+        //get all marked tracks
+        db.getMarkedTracks(null,function(err,docs){
+            if(err) res.sendStatus(500);
+            for(var i = 0 ;i<docs.length;i++){
+                var deleteHeader= {
+                    url: config.server.selfPath+"/rest/playlist/track/remove"+"?track_uri="+docs[i].track_uri,
+                };
+                request.delete(deleteHeader, function (error, response, body){
+                    if (error) return log.err("failed removing on cleanup");
+                });
+            }
+            return res.sendStatus(200);
+        });
+    });
+    
     // ============================================================= USER =================================================================================== //
 
     //creates a new user

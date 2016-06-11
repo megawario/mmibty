@@ -48,6 +48,25 @@ angular.module('mmibty.controllers',
 						}).bind(this));}
 				}).bind(this))};
 
+		this.adminClearMarked = function(){
+			mmibtyAPI.adminClearMarked().then(
+				(function(response){
+					if(response==200){
+						mmibtyBootbox.show(mmibtyBootbox.dialogType.alert,
+							'Cleanup',
+							'Songs marked for death, removed!');
+					}
+					this.getPlaylistTracks();
+				}).bind(this)
+				,(function(response){
+					mmibtyBootbox.show(mmibtyBootbox.dialogType.alert,
+						'Cleanup Failure',
+						'Failure on removing marked songs');
+					this.getPlaylistTracks();
+				}).bind(this)
+			);
+		};
+
 		//adds a new user - refreshes user view
 		this.adminAddUser = function (){
 			//TODO Fix here the search for undefined
@@ -93,7 +112,8 @@ angular.module('mmibty.controllers',
 					if(response.status==201){ //track created
 						this.getPlaylistTracks(); //refresh playlist
 						this.getUserStatus();     //refresh user stats
-						//TODO do something with the response if needed ie show window saying it went well.
+						mmibtyBootbox.show(mmibtyBootbox.dialogType.alert,
+							"Song added","Your song has been added. Enjoy!");
 					}
 				}).bind(this),
 				(function(response){
@@ -102,6 +122,28 @@ angular.module('mmibty.controllers',
 						response.data.error+" \n "+response.data.message);
 				}).bind(this)
 			)};
+
+		//delete track - just delete track from the array, easier than requesting another load.
+		this.removeTrack = function(track){
+			mmibtyAPI.removeTrack(track.track_uri).then(
+				(function(response){
+					if(response.status==200){
+						//individual remove, without going to server
+						//TODO better fetch
+						/*
+						for(var i=0;i < this.playlistTracksArray.length;i++) {
+							var index = this.playlistTracksArray[i].tracks.indexOf(track); //remove track from the array.
+							if(index!=-1){
+								this.playlistTracksArray[i].tracks.splice(index, 1);
+								break;
+							}
+						}*/
+					}
+					this.getUserStatus();
+					this.getPlaylistTracks();
+				}).bind(this),function(){alert("Could not remove track");}
+			);
+		};
 
 		//searches for song music use this.search to find it
 		this.searchTrack = function(){
@@ -152,7 +194,13 @@ angular.module('mmibty.controllers',
 			if(keyEvent.which == 13) this.searchTrack();
 		};
 
-		
+		// =========== Track =========== //
+
+		//mark for deletion if track delta is bigger than 5
+		this.isMarked = function(track){
+			//TODO REMOVE hardcoded marked for death value
+			return (track.hate.length-track.love.length)>5
+		}
 
 		// =========== Playlist =========== //
 
@@ -222,17 +270,37 @@ angular.module('mmibty.controllers',
 		this.getLove = function(url){return this.love};
 		this.getHate = function(url){return this.hate};
 
-		this.setLove = function(url){
-			alert("Its not a bug - it is a feature :D - not available yet");
-			//mmibtyAPI.setLove(url).then(
-			//	(function(response){this.getLove(response.data.track_uri);}).bind(this),
-			//			function(){alert("failed on seting Love");});
+		this.setLove = function(track){
+			mmibtyAPI.setLove(track.track_uri).then(
+				(function(response){
+					if(response.status==200){
+						var index= track.love.indexOf(this.name);
+						var hateIndex = track.hate.indexOf(this.name);
+						if(index==-1){ //toggle love
+							track.love.push(this.name);
+							if(hateIndex!=-1) track.hate.splice(hateIndex,1);
+						}else{
+							track.love.splice(index,1);}
+					}
+					}).bind(this),
+						function(){alert("failed on set/unset Love");});
 		};
-		this.setHate = function(url){
-			alert("Its not a bug - it is a feature :D - not available yet");
-			//mmibtyAPI.setHate(url).then(
-			//(function(response){this.getHate(response.data.track_uri);}).bind(this),function(){alert("failed on setting Hate");});
-		};
+
+		this.setHate = function(track){
+			mmibtyAPI.setHate(track.track_uri).then(
+				(function(response){
+					if(response.status==200){
+						var index= track.hate.indexOf(this.name);
+						var loveIndex= track.love.indexOf(this.name);
+						if(index==-1){ //toggle love
+							track.hate.push(this.name);
+							if(loveIndex!=-1) track.love.splice(loveIndex,1);
+						}else{
+							track.hate.splice(index,1);}
+					}
+				}).bind(this),
+				function(){alert("failed on set/unset Hate");});
+			};
 
 		// ========== Start ========== //
 		this.getPlaylistTracks();

@@ -17,8 +17,8 @@ module.exports = mongoose.model("track", new mongoose.Schema(
         // == track status ==//
         love_num:Number,
         hate_num:Number,
-        love:Array,         //list of user_name that loves
-        hate:Array,         //list of user_name that hates
+        love:{type:[String], default:[]},         //list of user_name that loves
+        hate:{type:[String], default:[]},         //list of user_name that hates
         deleted:Boolean,    //have been deleted
 
         // == track characteristics taken from spotify API ==//
@@ -27,6 +27,7 @@ module.exports = mongoose.model("track", new mongoose.Schema(
             preview:String,
             name:String,
             singer:String,
+            singer_url:String,
             album:String,
             danceability: {type: Number, default: 0},
             energy: {type: Number, default: 0},
