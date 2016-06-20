@@ -1,6 +1,23 @@
 @import url("bootstrap.min.css");
 @import url("stat.css");
 @import url("spinner.css");
+@import url("search.css");
+
+/**body{background-color: #778866;} **/
+
+.card {
+    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+}
+
+.lovehate {
+    position:relative;
+    top:9px;
+
+}
+
+.lovehate h6{
+
+}
 
 .trackMarkedIcon {
     margin:5px;
@@ -147,6 +164,8 @@ footer i{
     width:  250px !important;
 }
 
+.thumb-img {}
+
 .thumb-small{
     text-align:center;
     float:left;
@@ -160,3 +179,4 @@ footer i{
 .caption-nomargin{
     margin: 0px;
 }
+

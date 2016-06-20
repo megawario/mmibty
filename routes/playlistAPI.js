@@ -171,8 +171,8 @@ module.exports = function (express, config, utils, db) {
         var track_uri = req.query.track_uri;
         db.getTrack(null,track_uri,function(err,track){
             //check if user is authorized to remove track.
-            //TODO admin can remove any track:
-            if(err || track.user!=user || typeof track=="undefined") return res.sendStatus(403);
+            //restrict to user but allow admin to delete any music.
+            if((err || track.user!=user || typeof track=="undefined") && config.master!=user ) return res.sendStatus(403);
 
             this.spotRemoveTrack(null, track_uri, function(err){
                 db.removeTrack(err,track_uri,function(err){
