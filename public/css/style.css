@@ -1,4 +1,4 @@
-@import url("bootstrap.min.css");
+@import url("lib/bootstrap.min.css");
 @import url("stat.css");
 @import url("spinner.css");
 @import url("search.css");
@@ -12,12 +12,9 @@
 .lovehate {
     position:relative;
     top:9px;
-
 }
 
-.lovehate h6{
-
-}
+.lovehate h6{}
 
 .trackMarkedIcon {
     margin:5px;

@@ -1,9 +1,23 @@
 /**
- * Created by mpinto on 07/06/16.
- * Handles the routes for most User services
+ * Module responsible for implementing the API for the site administrator.
+ * @module adminAPI
+ * @requires module:express
+ * @requires module:config
+ * @requires module:utils
  */
 
-module.exports = function(express,config,utils,database){
+/**
+ * Factory method for creating the adminAPI by returning a configured Router class from express.js
+ * The route will do automaticly several things:
+ * 1 - will log the access
+ * 2 - will authenticate the request
+ * @param express
+ * @param config
+ * @param {module:utils} utils module
+ * @param {Database} database class with connections to database
+ * @returns {Router} returns a express.js router with the paths for the API
+ */
+function adminAPIFactory(express,config,utils,database){
 
     var router = express.Router();
     var bodyParser= require("body-parser");
@@ -12,13 +26,13 @@ module.exports = function(express,config,utils,database){
     var ipv4 = utils.ipv4;
     var db = database;
 
-    //Allways log access
+    //Use module, will allways log the requests to adminAPI
     router.use(function logRequest(req,res,next){
         log.info('Admin request from '+ipv4(req.ip)+' to '+req.path);
         next();
     });
 
-    //allways check if authorized
+    //Allways checks authorization to access the adminAPI
     router.use(function(req,res,next){
         var remote = ipv4(req.connection.remoteAddress);
         if(config.master != remote){
@@ -32,6 +46,11 @@ module.exports = function(express,config,utils,database){
     router.use(bodyParser.json());
 
     // ============================================================= TRACKS =================================================================================== //
+    /**
+     * @memberof adminAPI
+     * @method cleanmarked
+     * @inner
+     */
     router.delete('/cleanmarked',function(req,res){
         var remote = ipv4(req.connection.remoteAddress);
         var userID = config.master;
@@ -52,7 +71,7 @@ module.exports = function(express,config,utils,database){
             return res.sendStatus(200);
         });
     });
-    
+
     // ============================================================= USER =================================================================================== //
 
     //creates a new user
@@ -175,6 +194,8 @@ module.exports = function(express,config,utils,database){
             });
         }
     });
-    
+
     return router;
 }
+
+module.exports=adminAPIFactory;

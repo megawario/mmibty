@@ -1,0 +1,24 @@
+<!--Login template-->
+<div>
+    <div [class.hidden]="isLogin || isRegister">
+        <button class="btn btn-primary btn-lg" (click)="setLogin(true)">Login</button>
+        or
+        <button class="btn btn-primary btn-lg" (click)="setRegister(true)">Register</button>
+    </div>
+
+    <!--login-->
+    <div [class.hidden]="!isLogin">
+        <login></login>
+    </div>
+
+    <!--register-->
+    <div [class.hidden]="!isRegister">
+        <register></register>
+    </div>
+
+    <div>
+        <small [class.hidden]="!isRegister">already registered? login <a (click)="toggleLR()">here</a></small>
+        <small [class.hidden]="!isLogin">without an account? register <a (click)="toggleLR()">here</a></small>
+    </div>
+
+</div>

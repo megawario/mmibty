@@ -1,36 +1,62 @@
-//Database access for the server
-// Instanciate the object and access database using the methods.
+/**
+ * @module database
+ * @requires module:mongoose
+ * @requires module:config
+ * @requires module:utils
+ * Module that contains the Database object.
+ * It is tightly coupled with mongoose.js for database access
+ * Returns a singleton of a Database object to be used though the application.
+ */
 
-module.exports = function Database(connectionString){
-	log = require('./utils').log;
-	this.mongoose = require('mongoose');
+var config = require("./config");
+var log = require("./utils").log;
+
+/**
+ * @constructor Database
+ * @param {string} connectionString connection string for the database
+ * @param {object}  logger
+ * @returns {Database} returns a database class.
+ */
+function Database(connectionString,log){
+	this.mongoose = require("mongoose");;
 	this.mongoose.connect(connectionString);
+
 
 	//load schemas
 	//mock models for accesstoken and refresh token
-	this.accessToken = mongoose.model('accessToken',new  mongoose.Schema({access_token:String},{ strict: false }));
-	this.refreshToken = mongoose.model('refreshToken',new mongoose.Schema({refresh_token:String}, { strict: false }));
+	this.accessToken = this.mongoose.model('accessToken',new  this.mongoose.Schema({access_token:String},{ strict: false }));
+	this.refreshToken = this.mongoose.model('refreshToken',new this.mongoose.Schema({refresh_token:String}, { strict: false }));
 	this.track = require('./models/tracks');
 	this.user = require('./models/users');
+	this.nuser = require('./models/nusers');
 
 	//connection events:
 	this.mongoose.connection.on('connected',function(){
 		log.info('Mongoose connected to: '+connectionString);
 	});
+
 	this.mongoose.connection.on('error',function(err){
 		log.err('Mongoose error on connection: '+err);
 	});
+
 	this.mongoose.connection.on('disconnected',function(){
 		log.warning('Mongoose disconnected');
 	});
 
 	//=================================================== STATS ===========================================//
 
-	//feed server statistic
+	/**
+	 * @methodof Database
+	 * Feed server statistics
+	 * TODO empty method
+	 */
 	this.getServerStats = function(){};
 
-	//feed playlist statistic
-	//will consist of: top user for each "your music" category total playtime
+	/**
+	 * Feed playlist statistic
+	 * will consist of: top user for each "your music" category total playtime
+	 * @param callback
+	 */
 	this.getPlaylistStats = function(callback){
 		//fetch max
 		var queryMaxSong = this.user.findOne({}).sort({song_number:-1});
@@ -76,11 +102,12 @@ module.exports = function Database(connectionString){
 	 * @param callback will receive and object containing extra info.
 	 */
 	this.getPlaylistTracks = function(err,offset,callback){
+		log.debug("Fetching playlist items");
 		if(err) return callback(err);
-		this.track.find({},function(err,docs){
-
-			result={tracks:docs,next:"null"}
-
+		this.track.find({}).limit(offset).exec(function(err,docs){
+			if(docs.length>0){
+				result = {tracks:docs,next:true};
+			}else{result={tracks:docs,next:false};}
 			return callback(err,result);
 		});
 
@@ -96,7 +123,7 @@ module.exports = function Database(connectionString){
 		//check if track has been added if not, add
 		this.track.find({'track_uri':track_uri},
 			(function(err,docs){
-				if (!err && docs == ""){ 
+				if (!err && docs == ""){
 					return callback(err);
 //TODO fix with getTrack
 				}else{ //track found
@@ -108,7 +135,12 @@ module.exports = function Database(connectionString){
 		);
 	};
 
-	//returns a doc with the track
+	/**
+	 * Returns a doc with the track
+	 * @param err
+	 * @param {String} track_uri
+	 * @param callback
+	 */
 	this.getTrack = function(err,track_uri,callback){
 		this.track.find({track_uri:track_uri},function(err,doc){
 			callback(err,doc[0]);
@@ -116,6 +148,12 @@ module.exports = function Database(connectionString){
 
 	};
 
+	/**
+	 * Get tracks that are marked for removal
+	 * @param err
+	 * @param callback
+	 * @returns {*}
+	 */
 	this.getMarkedTracks = function(err,callback) {
 		if(err) return callback(err);
 		this.track.find({deleted: true}, callback);
@@ -182,6 +220,43 @@ module.exports = function Database(connectionString){
 	};
 
 	/**
+	 * Updates/Creates new user status on the database for the newly user added track
+	 * @param userID
+	 * @param userName
+	 * @param reset If true, will reset all stat fields to default: 0
+	 * @param jsonData
+	 */
+	this.addUserStats = function (err,userID,userName,jsonData,callback){
+		if(err) return callback(err);
+		this.user.findOneAndUpdate({ user:userID, user_name:userName},{},
+			{upsert:true, new:true},
+			function(err,doc){
+				if(err){
+					log.err(err);
+				}else {
+					//compile information
+					var prev_percent = doc.song_number / (doc.song_number + 1);
+					doc.song_number += 1;
+					doc.danceability = doc.danceability * prev_percent + jsonData.stats.danceability / doc.song_number;
+					doc.energy = doc.energy * prev_percent + jsonData.stats.energy / doc.song_number;
+					doc.loudness = doc.loudness * prev_percent + jsonData.stats.loudness / doc.song_number;
+					doc.speechiness = doc.speechiness * prev_percent + jsonData.stats.speechiness / doc.song_number;
+					doc.acousticness = doc.acousticness * prev_percent + jsonData.stats.acousticness / doc.song_number;
+					doc.instrumentalness = doc.instrumentalness * prev_percent + jsonData.stats.instrumentalness / doc.song_number;
+					doc.liveness = doc.liveness * prev_percent + jsonData.stats.liveness / doc.song_number;
+					doc.valence = doc.valence * prev_percent + jsonData.stats.valence / doc.song_number;
+					doc.duration_ms += jsonData.stats.duration_ms;
+
+					doc.save(function(err){
+						callback(err);
+					});
+				}
+			});
+
+
+	};
+
+	/**
 	 * Adds track to the playlist storing all the required information.
 	 * The dataJson must contain the following fields:
 	 *  - track_features, track_info
@@ -200,9 +275,8 @@ module.exports = function Database(connectionString){
 		//add features to track
 		var feat = dataJson.track_features;
 		var info = dataJson.track_info;
-
 		var result={};
-		console.log(JSON.stringify(info));
+
 		result.stats = {
 			image:{
 				small: info.album.images[2].url,
@@ -233,12 +307,13 @@ module.exports = function Database(connectionString){
 		result.user_name = dataJson.user_name;  //user_name that added song
 
 		// 2 - send to the database
-		this.track.create(result, function (err) {
-			if(err) return callback("Could not add the required track to database");
-			addUserStats(err,result.user,result.user_name,result,function(err){
+		this.track.create(result,
+			function (err) {
 				if(err) return callback("Could not add the required track to database");
-				return callback(err);
-			});
+					this.addUserStats(err,result.user,result.user_name,result,function(err){
+					if(err) return callback("Could not add the required track to database");
+					return callback(err);
+				});
 		})
 	};
 
@@ -260,6 +335,11 @@ module.exports = function Database(connectionString){
 		});
 	};
 
+	/**
+	 * Gets information regarding a track
+	 * @param userID
+	 * @param callback
+	 */
 	this.getTrackInfo = function(userID,callback){
 		this.user.find({user:userID},function(err,doc){
 			if(err) callback(err);
@@ -300,45 +380,6 @@ module.exports = function Database(connectionString){
 	};
 
 	/**
-	 * Updates/Creates new user status on the database for the newly user added track
-	 * @param userID
-	 * @param userName
-	 * @param reset If true, will reset all stat fields to default: 0
-	 * @param jsonData
-	 */
-	this.addUserStats = function(err,userID,userName,jsonData,callback){
-		if(err) return callback(err);
-		this.user.findOneAndUpdate({ user:userID, user_name:userName},{},
-			{upsert:true, new:true},
-			function(err,doc){
-				if(err){
-					log.err(err);
-					console.log(doc);
-				}else {
-
-						//compile information
-						var prev_percent = doc.song_number / (doc.song_number + 1);
-						doc.song_number += 1;
-						doc.danceability = doc.danceability * prev_percent + jsonData.stats.danceability / doc.song_number;
-						doc.energy = doc.energy * prev_percent + jsonData.stats.energy / doc.song_number;
-						doc.loudness = doc.loudness * prev_percent + jsonData.stats.loudness / doc.song_number;
-						doc.speechiness = doc.speechiness * prev_percent + jsonData.stats.speechiness / doc.song_number;
-						doc.acousticness = doc.acousticness * prev_percent + jsonData.stats.acousticness / doc.song_number;
-						doc.instrumentalness = doc.instrumentalness * prev_percent + jsonData.stats.instrumentalness / doc.song_number;
-						doc.liveness = doc.liveness * prev_percent + jsonData.stats.liveness / doc.song_number;
-						doc.valence = doc.valence * prev_percent + jsonData.stats.valence / doc.song_number;
-						doc.duration_ms += jsonData.stats.duration_ms;
-
-					doc.save(function(err){
-						callback(err);
-					});
-				}
-			});
-
-
-	};
-
-	/**
 	 * Runs through all songs, and recalculates all fields.
 	 * 1 - resets all.
 	 * 2 - run through all musics
@@ -360,11 +401,16 @@ module.exports = function Database(connectionString){
 			});
 		}
 	};
-
-
+	
 	// ================================ Admin Ops =============================== //
 
-	//adds new user to database
+	/**
+	 * @memberof Database
+	 * Adds new user to database
+	 * @param {String} userID
+	 * @param {String} userName
+	 * @param callback
+	 */
 	this.adminAddUser = function(userID,userName,callback){
 		this.user.findOneAndUpdate({user:userID, user_name:userName},{},
 			{upsert:true, new:true},
@@ -375,7 +421,12 @@ module.exports = function Database(connectionString){
 		);
 
 	};
-	//removes new user to database and does cleanup
+
+	/**
+	 * removes new user to database and does cleanup
+	 * @param {String} userID
+	 * @param callback
+	 */
 	this.adminRemoveUser = function(userID,callback){
 		this.user.findOneAndRemove({user:userID},function(err,doc){
 			//todo process cleanup here
@@ -383,7 +434,10 @@ module.exports = function Database(connectionString){
 		})
 	};
 
-	//fetches all users available
+	/**
+	 * fetches all available users
+	 * @param callback
+	 */
 	this.adminGetUsers = function(callback){
 		this.user.find({},'user user_name',function(err,docs){
 			return callback(err,docs);
@@ -392,7 +446,11 @@ module.exports = function Database(connectionString){
 		})
 	};
 
-	//checks if user exist on database
+	/**
+	 * Checks if user exists on database
+	 * @param {String} userID
+	 * @param callback
+	 */
 	this.adminCheckUserAuth = function(userID,callback){
 		this.user.findOne({user:userID},'user_name',function(err,doc){
 			if(doc == null) err="Not found";
@@ -422,7 +480,10 @@ module.exports = function Database(connectionString){
 		});
 	};
 
-	//store refresh and auth tokens:
+	/**
+	 * Store access token
+	 * @param json access token
+	 */
 	this.storeAccessToken = function(json){
 		log.debug("storing access token");
 		//remove all access tokens:
@@ -432,6 +493,10 @@ module.exports = function Database(connectionString){
 		});
 	};
 
+	/**
+	 * Store refresh token
+	 * @param json refresh token
+	 */
 	this.storeRefreshToken = function(json){
 		log.debug("storing refresh token");
 		this.refreshToken.remove({}).exec(); //not waitin for server response
@@ -440,7 +505,10 @@ module.exports = function Database(connectionString){
 		});
 	};
 
-	//fetch
+	/**
+	 * Retreives access token
+	 * @param callback
+	 */
 	this.getAccessToken = function(callback){
 		this.accessToken.find({},function(err,docs){
 			if(err ||docs[0]==undefined){
@@ -454,9 +522,60 @@ module.exports = function Database(connectionString){
 		});
 	};
 
+	/**
+	 * Retreives refresh token
+	 * @param callback
+	 */
 	this.getRefreshToken= function(callback){
 		this.refreshToken.find({},callback);
 	};
 
-	return this;
+	this.authUser = function(email,password){
+		return new Promise(
+			(function(resolve,reject){
+				this.nuser.findOne({email:email},
+					function(err,doc){
+						if(err || doc == null || doc.password!=password){return reject(err)}
+						return resolve(doc);
+					})
+			}).bind(this)
+		);
+	}
+
+	// ================================ User ============================= //
+	/**
+	 *
+	 * @param user must be in line with the schema definition of nuser
+	 * @returns {Promise} returns a promisse, with resolve if successful
+     */
+	this.createUser = function(user){
+
+		var promise = new Promise(
+			(function(resolve,reject){
+
+				this.nuser.findOne({email:user.email},
+					(function(err,doc){
+						if(doc != null){ return reject(Error("user allready exists"));};
+						if(err){return reject(Error("the following error occured: "+err));}
+						else{
+							newUser = new this.nuser({
+								username:user.username,
+								email:user.email,
+								password:user.password});
+							newUser.save(function(err){
+								if(err) reject(err);
+								else resolve();
+							})
+						}
+					}).bind(this)
+				)
+			}).bind(this)
+		);
+		//promise.bind(this);
+		return promise;
+		};
 }
+
+//use as a singleton due to require cache.
+var database = new Database(config.server.dbURL,log);
+module.exports = database;

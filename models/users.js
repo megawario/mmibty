@@ -1,14 +1,18 @@
 /**
- * Created by mpinto on 07/06/16.
- * Users model for database
+ * @module models
  */
 
-module.exports = mongoose.model("user",
-    new mongoose.Schema({
-        "user":String, 
+var mongoose = require("mongoose");
+/**
+ * Schema used to represent an user on a specific playlist
+ * @Constructor
+ * @author mpinto
+ */
+var UserSchema = new mongoose.Schema({
+        "user":String,
         "user_name":String,
         "song_number": { type: Number, default:0}, //number of songs
-        
+
         // == stats for musics == //
         "danceability": {type: Number, default: 0},
         "energy": {type: Number, default: 0},
@@ -22,4 +26,6 @@ module.exports = mongoose.model("user",
         "valence": {type: Number, default: 0},
         "tempo": {type: Number, default: 0},
         "duration_ms": {type: Number, default: 0}
-}));
+        });
+
+module.exports = mongoose.model("user",UserSchema);

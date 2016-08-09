@@ -1,14 +1,20 @@
 /**
- * Created by mpinto on 08/06/16.
- * database model for tracks on the playlist
- * Should store all ingo needed in order be not necessary to fetch aditional info from
- * the spotify api regarding the songs present
- *
- *
- * Voted deleted tracks are to be blacklisted
- * User removed tracks can be added still
+ * @module models
  */
-module.exports = mongoose.model("track", new mongoose.Schema(
+
+var mongoose = require("mongoose");
+/**
+ * Database model for tracks on the playlist.
+ *
+ * Should store all info needed in order be not necessary to fetch additional info from
+ * the spotify api regarding the songs present.
+ *
+ * Voted deleted tracks are to be blacklisted.
+ * User removed tracks can be still added.
+ * @Constructor
+ * @author mpinto
+ */
+var TrackSchema =  new mongoose.Schema(
     {
         track_uri:String, //song uri
         user:String,      //user id that added song
@@ -42,5 +48,7 @@ module.exports = mongoose.model("track", new mongoose.Schema(
             tempo: {type: Number, default: 0},
             duration_ms: {type: Number, default: 0}
         }
-        
-    }));
+
+    });
+
+module.exports = mongoose.model("track",TrackSchema);
