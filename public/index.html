@@ -3,9 +3,9 @@
 <head>
     <title>My Music Is Better Than Yours</title>
     <meta charset="UTF-8">
-
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="=viewport" content="width=device-width,initial-scale=1">
+    <base href="/mmibty/">
 
 
     <!-- BootStrap -->
@@ -14,139 +14,243 @@
 
     <!--recaptcha-->
     <script src='https://www.google.com/recaptcha/api.js'></script>
-    <!-- 1. Load libraries -->
-    <!-- Polyfill(s) for older browsers -->
-    <script src="node_modules/core-js/client/shim.min.js"></script>
-    <script src="node_modules/zone.js/dist/zone.js"></script>
-    <script src="node_modules/reflect-metadata/Reflect.js"></script>
-    <script src="node_modules/systemjs/dist/system.src.js"></script>
 
-    <script src="systemjs.config.js"></script>
-    <script>
-        System.import('app').catch(function(err){ console.error(err);});
-    </script>
+    <!-- Angular scripts -->
+    <script src="js/jquery-2.2.0.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-cookies.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-animate.js"></script>
 
+
+
+    <script src="js/mmibty.js"></script>
+    <script src="js/services/UserService.js"></script>
+    <script src="js/controllers/index.js"></script>
+    <script src="js/filters/filters.js"></script>
+    <script src="js/bootbox.js"></script>
 </head>
 <body>
 
-    <!-- Navbar -->
-    <div class="navbar-wrapper">
-        <div class="container">
+<!-- Navbar -->
+<div class="navbar-wrapper">
+    <div class="container">
 
-            <nav class="navbar navbar-inverse navbar-static-top">
-                <div class="container">
-                    <div class="navbar-header">
-                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                            <span class="sr-only">Toggle navigation</span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </button>
-                        <a class="navbar-brand" href="#">MMIBTY</a>
-                    </div>
-                    <div id="navbar" class="navbar-collapse collapse">
-                        <ul class="nav navbar-nav">
-                            <li class="active"><a href="#">Login</a></li>
-                            <li><a href="#about">Playlists</a></li>
-                        </ul>
+        <nav class="navbar navbar-inverse navbar-static-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">MMIBTY</a>
+                </div>
+                <div id="navbar" class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="#">Login</a></li>
+                        <li><a href="#about">Playlists</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+    </div>
+</div>
+
+
+<div class="jumbotron text-center">
+    <h1>My Music Is Better Than Yours</h1>
+    <p>Spotify <i>augmented</i> playlist management</p>
+    <p>Share your music in a group</p>
+
+    <div ng-controller="indexController as index" >
+        <div ng-hide="index.isLogin || index.isRegister" >
+            <button class="btn btn-primary btn-lg" ng-click="index.goLogin()">Login</button>
+            or
+            <button class="btn btn-primary btn-lg" ng-click="index.goRegister()">Register</button>
+        </div>
+
+        <div ng-show="index.isLogin">
+            <form name="login_form">
+                <div class="form-group">
+                    <label for="email">email</label>
+                    <input id="login_email" type="text" class="form-control" required
+                           ng-model="index.user.email" name="login_email">
+                    <div ng-show="login_form.$submitted || login_form.login_email.$touched">
+                        <div ng-show="login_form.login_email.$error.required" class="alert alert-danger">Your email is required</div>
                     </div>
                 </div>
-            </nav>
 
+                <div class="form-group">
+                    <label for="password">password</label>
+                    <input id="login_password" type="password" class="form-control" required
+                           ng-model="index.user.password" name="login_password">
+                    <div ng-show="login_form.$submitted || login_form.login_password.$touched">
+                        <div ng-show="login_form.login_password.$error.required" class="alert alert-danger">Your password is required</div>
+                    </div>
+                </div>
+                <div ng-show="index.loginError">
+                    <div class="alert alert-danger"> {{index.loginError}}</div>
+                    <small>Forgotten password? try to recover it <a href="#">here</a></small>
+                </div>
+
+                <button type="submit" ng-click="index.doLogin(index.user)" class="btn btn-primary btn-lg">
+                    <!--[disabled]="!loginForm.form.valid">-->
+                    <div ng-show="isSub" class="butSpinner">
+                        <div class="rect1"></div>
+                        <div class="rect2"></div>
+                        <div class="rect3"></div>
+                        <div class="rect4"></div>
+                        <div class="rect5"></div>
+                    </div>
+                    <div ng-show="!isSub">login</div></button>
+            </form>
         </div>
+        <div ng-show="index.isRegister">
+            <form >
+                <div class="form-group">
+                    <label for="username">username</label>
+                    <input id="username" type="text" class="form-control" required
+                           ng-model="index.user.username"
+                           name="username" >
+                    <div [hidden]="username.valid || username.pristine" class="alert alert-danger">
+                        Name is required
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">email</label>
+                    <input id="email" type="text" class="form-control" required
+                           ng-model="index.user.email"
+                           name="email">
+                    <div [hidden]="email.valid || email.pristine" class="alert alert-danger">
+                        Email is required
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">password</label>
+                    <input id="password" type="password" class="form-control" required
+                           ng-model="index.user.password"
+                           name="password">
+                    <div [hidden]="password.valid || password.pristine" class="alert alert-danger">
+                        Password is required
+                    </div>
+                </div>
+
+                <!--proof that you are not a robot-->
+                <div class="checkbox">
+                    <label><input type="checkbox" value="" required>I have read the <a>terms</a> and <a>privacy</a> sections and accept its conditions</label>
+                </div>
+                <div class="g-recaptcha" data-sitekey="6LcX2yYTAAAAAOrvt5lHoBswZ7_JnJAVOToCmTwp"></div>
+                <button type="submit" class="btn btn-default" ng-click="index.doRegister(index.user)
+                        [disabled]="!registerForm.form.valid">
+                    <div [class.hidden]="!isSub" class="butSpinner">
+                        <div class="rect1"></div>
+                        <div class="rect2"></div>
+                        <div class="rect3"></div>
+                        <div class="rect4"></div>
+                        <div class="rect5"></div>
+                    </div>
+                    <div [class.hidden]="isSub">Register</div>
+                </button>
+            </form>
+        </div>
+
+        <div>
+            <small ng-show="index.isRegister">already registered? login <a ng-click="index.goLogin()">here</a></small>
+            <small ng-show="index.isLogin">without an account? register <a ng-click="index.goRegister()">here</a></small>
+        </div>
+
     </div>
 
-
-    <div class="jumbotron text-center">
-        <h1>My Music Is Better Than Yours</h1>
-        <p>Spotify <i>augmented</i> playlist management</p>
-        <p>Share your music in a group</p>
-        <lr>
-            <div class="spinner" ng-show="mm.search_load">
+    <lr>
+        <div class="spinner" ng-show="mm.search_load">
             <div class="rect1"></div>
             <div class="rect2"></div>
             <div class="rect3"></div>
             <div class="rect4"></div>
             <div class="rect5"></div>
         </div>
-        </lr>
+    </lr>
+</div>
+
+<!-- Features & marketing -->
+<div class="container marketing">
+
+    <!-- Three columns of text below the carousel -->
+    <div class="row">
+        <div class="col-lg-4">
+            <img class="img-circle" src="images/spotify_logo.png" alt="spotify logo" width="140" height="140">
+            <h2>Spotify</h2>
+            <p>Based on the spotify service, get access to all the music spotify has to offer. Share your playlist with your friends, having access to all the extra available functionality.</p>
+        </div><!-- /.col-lg-4 -->
+        <div class="col-lg-4">
+            <img class="img-circle" src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" alt="Simple Registry" width="140" height="140">
+            <h2>Simple registry</h2>
+            <p>Only the playlist member needs to have an Spotify account to use the service. All other users can register to the playlist using a simple auth method, simplifiying the access of your application.</p>
+        </div><!-- /.col-lg-4 -->
+        <div class="col-lg-4">
+            <img class="img-circle" src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" alt="Everyone can listen" width="140" height="140">
+            <h2>Everyone can listen</h2>
+            <p>Because it is based on Spotify, the playlist can be listened by anyone you want. Very cool for discovering the types of music a group likes.</p>
+        </div><!-- /.col-lg-4 -->
+    </div><!-- /.row -->
+
+
+    <!-- START THE FEATURETTES -->
+
+
+    <hr class="featurette-divider">
+    <h1>How does it work?</h1>
+    <div class="row featurette">
+        <div class="col-md-7">
+            <h2 class="featurette-heading">Login with spotify account</h2>
+            <p class="lead">The first step is login with a owner account - must be a spotify account. https://developer.spotify.com/web-api/tutorial/ </p>
+        </div>
+        <div class="col-md-5">
+            <img class="featurette-image img-responsive center-block" data-src="holder.js/500x500/auto" alt="Generic placeholder image">
+        </div>
     </div>
 
-    <!-- Features & marketing -->
-    <div class="container marketing">
+    <hr class="featurette-divider">
 
-        <!-- Three columns of text below the carousel -->
-        <div class="row">
-            <div class="col-lg-4">
-                <img class="img-circle" src="images/spotify_logo.png" alt="spotify logo" width="140" height="140">
-                <h2>Spotify</h2>
-                <p>Based on the spotify service, get access to all the music spotify has to offer. Share your playlist with your friends, having access to all the extra available functionality.</p>
-            </div><!-- /.col-lg-4 -->
-            <div class="col-lg-4">
-                <img class="img-circle" src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" alt="Simple Registry" width="140" height="140">
-                <h2>Simple registry</h2>
-                <p>Only the playlist member needs to have an Spotify account to use the service. All other users can register to the playlist using a simple auth method, simplifiying the access of your application.</p>
-            </div><!-- /.col-lg-4 -->
-            <div class="col-lg-4">
-                <img class="img-circle" src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" alt="Everyone can listen" width="140" height="140">
-                <h2>Everyone can listen</h2>
-                <p>Because it is based on Spotify, the playlist can be listened by anyone you want. Very cool for discovering the types of music a group likes.</p>
-            </div><!-- /.col-lg-4 -->
-        </div><!-- /.row -->
-
-
-        <!-- START THE FEATURETTES -->
-
-
-        <hr class="featurette-divider">
-        <h1>How does it work?</h1>
-        <div class="row featurette">
-            <div class="col-md-7">
-                <h2 class="featurette-heading">Login with spotify account</h2>
-                <p class="lead">The first step is login with a owner account - must be a spotify account. https://developer.spotify.com/web-api/tutorial/ </p>
-            </div>
-            <div class="col-md-5">
-                <img class="featurette-image img-responsive center-block" data-src="holder.js/500x500/auto" alt="Generic placeholder image">
-            </div>
+    <div class="row featurette">
+        <div class="col-md-7 col-md-push-5">
+            <h2 class="featurette-heading">Create api key</h2>
+            <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
         </div>
-
-        <hr class="featurette-divider">
-
-        <div class="row featurette">
-            <div class="col-md-7 col-md-push-5">
-                <h2 class="featurette-heading">Create api key</h2>
-                <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
-            </div>
-            <div class="col-md-5 col-md-pull-7">
-                <img class="featurette-image img-responsive center-block" data-src="holder.js/500x500/auto" alt="Generic placeholder image">
-            </div>
+        <div class="col-md-5 col-md-pull-7">
+            <img class="featurette-image img-responsive center-block" data-src="holder.js/500x500/auto" alt="Generic placeholder image">
         </div>
-
-        <hr class="featurette-divider">
-
-        <div class="row featurette">
-            <div class="col-md-7">
-                <h2 class="featurette-heading">Share and play</h2>
-                <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
-            </div>
-            <div class="col-md-5">
-                <img class="featurette-image img-responsive center-block" data-src="holder.js/500x500/auto" alt="Generic placeholder image">
-            </div>
-        </div>
-
-        <hr class="featurette-divider">
-
-        <!-- FOOTER -->
-        <footer>
-            <p class="pull-right"><a href="#">Back to top</a></p>
-            <p>&copy; 2016 by Mário Pinto &middot; <a href="https://github.com/megawario/mmibty">Github</a></a> &middot; <a href="#">Privacy</a> &middot; <a href="#">Terms</a></p>
-        </footer>
-
     </div>
 
-    <!-- Script loading -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-    <script src="js/jquery-2.2.0.min.js"></script>
+    <hr class="featurette-divider">
+
+    <div class="row featurette">
+        <div class="col-md-7">
+            <h2 class="featurette-heading">Share and play</h2>
+            <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
+        </div>
+        <div class="col-md-5">
+            <img class="featurette-image img-responsive center-block" data-src="holder.js/500x500/auto" alt="Generic placeholder image">
+        </div>
+    </div>
+
+    <hr class="featurette-divider">
+
+    <!-- FOOTER -->
+    <footer>
+        <p class="pull-right"><a href="#">Back to top</a></p>
+        <p>&copy; 2016 by Mário Pinto &middot; <a href="https://github.com/megawario/mmibty">Github</a></a> &middot; <a href="#">Privacy</a> &middot; <a href="#">Terms</a></p>
+    </footer>
+
+</div>
+
+<!-- Script loading -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="js/jquery-2.2.0.min.js"></script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 angular.module('mmibty',[
     'mmibty.controllers',
-    'mmibty.services',
-    'mmibty.filters',
-    'mmibty.bootbox']);
+    'mmibty.services'])
+    .config(function ($locationProvider){
+        $locationProvider.html5Mode(true);
+    });

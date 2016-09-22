@@ -2,16 +2,6 @@ angular.module('mmibty.services',[])
 	.factory('mmibtyAPI',function($http){
 		var result={};
 
-		//TODO change this to a server request in order to fetch using the token.
-		//get data on music
-		result.searchTrack = function(data){
-			var my_url = "https://api.spotify.com/v1/search?q="+data+"&type=track";
-			return $http({
-				method: 'GET',
-				url: my_url
-			});
-		};
-
 		//======= admin services =======//
 
 		result.adminClearMarked=function(){
@@ -119,16 +109,6 @@ angular.module('mmibty.services',[])
 				url:my_url
 			});
 		};
-
-		//gets generic URL
-		result.getURL = function(url){
-			var my_url = url;
-			return $http({
-				method: 'GET',
-				url: my_url
-			});
-		};
-
 
 		return result;
 	});

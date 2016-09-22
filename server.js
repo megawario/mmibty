@@ -39,12 +39,6 @@ app.use(config.server.path+"/admin",adminRoute);
 //serve static pages:
 app.use(config.server.path,express.static(__dirname + '/public'));
 
-//Angular2 is stupid and requires access to the modules like this.
-//TODO find a way to bypass this.
-app.use(config.server.path+'/node_modules/', express.static(__dirname + '/node_modules/'));
-
-
-
 //start server
 app.listen(config.server.port, function(){
     log.info('App running on port '+config.server.port);

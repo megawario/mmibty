@@ -11,7 +11,9 @@ var mongoose = require("mongoose");
 var UserSchema = new mongoose.Schema({
     "email":{type:String, required:true},
     "username":{type:String, required:true},
-    "password":{type:String, required:true}, //stored as SHA1
+    "password":{type:String, required:true},
+    "admin":{type:Boolean,default:false},
+    "activationLink":{type:String}, //recuperation and activation link
 
     // == GLOBAL MUSIC STATS == //
     "song_number": { type: Number, default:0}, //number of songs

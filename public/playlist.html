@@ -1,16 +1,19 @@
-<!DOCTYPE html lang="pt">
-<html ng-app='mmibty'>
+<!DOCTYPE html lang="en">
+<html ng-app='mmibty_app'>
 <head>
     <title>My Music Is Better Than Yours</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="=viewport" content="width=device-width,initial-scale=1">
+    <base href="/mmibty/">
+
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <script src="js/jquery-2.2.0.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-cookies.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-animate.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-route.js"></script>
 
     <!-- BootStrap -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
@@ -19,20 +22,24 @@
     <script src="js/bootbox.min.js"></script>
 
     <!-- Angular scripts -->
-    <script src="js/mmibty.js"></script>
-    <script src="js/services.js"></script>
-    <script src="js/controllers.js"></script>
-    <script src="js/filters.js"></script>
-    <script src="js/bootbox.js"></script>
+    <script src="js/mmibty_app.js"></script>
+    <script src="js/controllers/mmibty_app.js"></script>
+    <script src="js/services/SpotifyService.js"></script>
+    <script src="js/services/MMIBTYService.js"></script>
+    <script src="js/filters/filters.js"></script>
+    <!--<script src="js/services.js"></script>-->
+
+
+    <!--<script src="js/bootbox.js"></script>-->
 
 </head>
-<body ng-controller="mmibtyController as mm">
+<body>
 
 <div class="container">
     <div class="jumbotron">
         <div class="page-header">
             <h1>My music is better than yours
-                <small>FUNdão edition</small>
+                <small>PlaylistName</small>
             </h1>
         </div>
     </div>
@@ -54,9 +61,11 @@
             </ul>
         </div>
 
-        <!-- Search -->
+        <div ng-view></div>
+
+       <!-- &lt;!&ndash; Search &ndash;&gt;
         <div ng-show="mm.selected(0)">
-            <!-- search bar -->
+            &lt;!&ndash; search bar &ndash;&gt;
             <div class="input-group input-group-lg search-bar">
                 <input type="text"
                        class="form-control"
@@ -69,7 +78,7 @@
 	    </span>
             </div>
 
-            <!-- display search bar results -->
+            &lt;!&ndash; display search bar results &ndash;&gt;
             <div class="row">
                 <div ng-repeat="pages in mm.searchResultArray">
                     <div class="col-sm-6 col-md-3" ng-repeat="t in pages.tracks.items | orderBy:'-popularity'">
@@ -94,7 +103,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- Check if there are more results on search  -->
+                &lt;!&ndash; Check if there are more results on search  &ndash;&gt;
                 <div class="btn-block" ng-show="mm.searchResultArray[mm.searchResultArray.length-1].tracks.next!=null">
                     <a class="btn btn-default see-more"
                        ng-click="mm.getMoreTracks(mm.searchResultArray[mm.searchResultArray.length-1].tracks.next)">See
@@ -104,7 +113,7 @@
                 {{mm.search_failed_msg}}
             </div>
 
-            <!-- loading icon -->
+            &lt;!&ndash; loading icon &ndash;&gt;
             <div class="spinner" ng-show="mm.search_load">
                 <div class="rect1"></div>
                 <div class="rect2"></div>
@@ -114,7 +123,7 @@
             </div>
         </div>
 
-        <!--  User information -->
+        &lt;!&ndash;  User information &ndash;&gt;
         <div ng-show="mm.selected(1)">
             <h2 class="text-center">{{mm.name}} you contributed with {{mm.userStats.song_number>0 ?
                 mm.userStats.song_number : 0 }} awesome songs </h2>
@@ -216,7 +225,7 @@
             </div>
         </div>
 
-        <!-- Tracks available on the playlist -->
+        &lt;!&ndash; Tracks available on the playlist &ndash;&gt;
         <div ng-show="mm.selected(2)">
 
             <div ng-repeat="page in mm.playlistTracksArray">
@@ -248,7 +257,7 @@
 
 
                             </div>
-                            <!--
+                            &lt;!&ndash;
                             <div class=""title="Lovers: {{track.love}} Haters: {{track.hate}}">
 
                                 <i class="material-icons fav-remove" ng-show="track.love.indexOf(mm.name)!=-1"
@@ -263,7 +272,7 @@
                                 <i class="material-icons del" ng-show="track.hate.indexOf(mm.name)==-1"
                                    ng-click="mm.setHate(track)">remove_circle_outline</i>
                             </div>
-                            -->
+                            &ndash;&gt;
                         </div>
                         <div class="caption caption-nomargin">
 
@@ -294,7 +303,7 @@
                 {{mm.playlist_failure_msg}}
             </div>
 
-            <!-- loading icon -->
+            &lt;!&ndash; loading icon &ndash;&gt;
             <div class="spinner" ng-show="mm.playlist_loading">
                 <div class="rect1"></div>
                 <div class="rect2"></div>
@@ -304,7 +313,7 @@
             </div>
         </div>
 
-        <!-- Statistics of the playlist-->
+        &lt;!&ndash; Statistics of the playlist&ndash;&gt;
         <div ng-show="mm.selected(3)">
             <div class="row">
                 <div class="center-row">
@@ -314,7 +323,7 @@
             </div>
         </div>
 
-        <!-- Administrator pannel -->
+        &lt;!&ndash; Administrator pannel &ndash;&gt;
         <div ng-show="mm.selected(4)">
             <div class="btn-group btn-group-justified" role="group" aria-label="...">
                 <div class="btn-group" role="group" aria-label="Log In"><a href="admin/login">Log in</a></div>
@@ -349,7 +358,7 @@
                     </tr>
                 </table>
             </div>
-        </div>
+        </div>-->
     </div>
     <footer>
         <div class="well well-sm">Made with <i class="material-icons" title="love">favorite</i>!!! Fork this project ==>

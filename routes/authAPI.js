@@ -10,7 +10,8 @@ var log = utils.log;
 var ipv4 = utils.ipv4;
 
 function login (req,res){
-    res.redirect("playlist.html");
+    console.log(JSON.stringify(req));
+//    res.redirect("playlist.html");
 }
 
 
@@ -37,7 +38,7 @@ module.exports = function (router) {
     router.use(passport.initialize());
     router.use(passport.session());
 
-    router.post('/login',passport.myauth, login);
+    router.post('/login',passport.myauth);
     
     return router;
 }

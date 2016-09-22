@@ -1,4 +1,4 @@
-angular.module('mmibty.filters',[])
+angular.module('mmibty_app.filters',[])
 	.filter('cutwords',
 		function () {
 			return function (value, wordwise, max, tail) {

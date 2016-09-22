@@ -1,0 +1,58 @@
+<div>
+    <!-- search bar -->
+    <div class="input-group input-group-lg search-bar">
+        <input type="text"
+               class="form-control"
+               placeholder="Search for artist or music"
+               aria-describedby="sizing-addon1"
+               ng-model="playlist_search.searchInput"
+               ng-keypress="playlist_search.keypressSearch($event)">
+        <span class="input-group-btn">
+	      <button class="btn btn-default" type="button" ng-click="playlist_search.searchTrack()"><i class="material-icons">search</i></button>
+	    </span>
+    </div>
+
+    <!-- display search bar results -->
+    <div class="row">
+        <div ng-repeat="pages in playlist_search.searchResultArray">
+            <div class="col-sm-6 col-md-3" ng-repeat="t in pages.tracks.items | orderBy:'-popularity'">
+
+                <div class="thumbnail card">
+                    <img class="thumb-img" ng-src="{{t.album.images[1].url}}" alt="album image">
+                    <div class="caption">
+                        <h4 title="{{t.name}}">{{t.name | cutwords:false:20:'...'}}</h4>
+                        <h5>by: <a href={{t.artists[0].external_url.spotify}}>{{t.artists[0].name | cutwords:false:25:'...'}}</a></h5>
+
+                        <div class="favtime">
+                            <i class="material-icons">favorite</i>
+                            <p>{{t.popularity}}</p>
+                            <i class="material-icons">av_timer</i>
+                            <p>{{t.duration_ms | date:'mm:ss'}}</p>
+                            <a href="" title="add track"><i class="material-icons addbtn"
+                                                            ng-click="playlist_search.addTrack(t.uri)">add</i></a>
+                            <a href="{{t.preview_url}}" title="preview"><i class="material-icons prevbtn">play_arrow</i></a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Check if there are more results on search  -->
+        <div class="btn-block" ng-show="playlist_search.searchResultArray[playlist_search.searchResultArray.length-1].tracks.next!=null">
+            <a class="btn btn-default see-more"
+               ng-click="playlist_search.getMoreTracks(playlist_search.searchResultArray[playlist_search.searchResultArray.length-1].tracks.next)">See
+                more results</a></div>
+    </div>
+    <div class="alert alert-warning alert-dismissible" role="alert" ng-show="playlist_search.search_failed">
+        {{playlist_search.search_failed_msg}}
+    </div>
+
+    <!-- loading icon -->
+    <div class="spinner" ng-show="search_load">
+        <div class="rect1"></div>
+        <div class="rect2"></div>
+        <div class="rect3"></div>
+        <div class="rect4"></div>
+        <div class="rect5"></div>
+    </div>
+</div>
